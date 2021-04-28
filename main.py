@@ -14,45 +14,45 @@ from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Input
 import tensorflow as tf
 from tensorflow.python.keras.layers import ReLU, Add
+from tensorflow.python.keras.utils.vis_utils import plot_model
 
 game = Game()
 chess_game = Game()
 montecarlo = MonteCarlo(Node(chess_game))
 
 
+
 def build():
-    # initialize the input shape and channel dimension (this code
-    # assumes you are using TensorFlow which utilizes channels
-    # last ordering)
-    inputShape = (8, 8)
-    # construct both the "category" and "color" sub-networks
+    inputShape = (8, 8, 1)
     inputs = Input(shape=inputShape)
-
-    # categoryBranch = FashionNet.build_category_branch(inputs,
-    #                                                   numCategories, finalAct=finalAct, chanDim=chanDim)
-    # colorBranch = FashionNet.build_color_branch(inputs,
-    #                                             numColors, finalAct=finalAct, chanDim=chanDim)
-    # # create the model using our input (the batch of images) and
-    # # two separate outputs -- one for the clothing category
-    # # branch and another for the color branch, respectively
-    # model = Model(
-    #     inputs=inputs,
-    #     outputs=[categoryBranch, colorBranch],
-    #     name="fashionnet")
-    # # return the constructed network architecture
-
+    network = buildConvLayer(inputs)
+    for i in range(10):
+        network = buildResLayer(network)
+    model = Model(inputs, [buildPolicyHead(network), buildValueHead(network)])
     return model
 
-def buildPolicyHead(inputs):
-    policy = Conv2D(filters=1,kernel_size=1,strides=1)(inputs)
-    #to be continued
-    # policy =
+
 def buildValueHead(inputs):
-#finish
+    value = Conv2D(filters=1, kernel_size=1, strides=1)(inputs)
+    value = bn_relu(value)
+    value = Flatten()(value)
+    value = Dense(256)(value)
+    value = ReLU()(value)
+    value = Dense(1, activation='tanh')(value)
+    return value
+
+
+def buildPolicyHead(inputs):
+    policy = Conv2D(filters=32, kernel_size=1, strides=1)(inputs)
+    policy = bn_relu(policy)
+    policy = Flatten()(policy)
+    policy = Dense(2048, activation='softmax')(policy)
+    return policy
+
 
 def buildConvLayer(inputs):
-    conv = Conv2D(padding='same', filters=256, strides=1, kernel_size=3)
-    conv = relu_bn(conv)
+    conv = Conv2D(padding='same', filters=256, strides=1, kernel_size=3)(inputs)
+    conv = bn_relu(conv)
     return conv
 
 
@@ -60,12 +60,16 @@ def buildResLayer(inputs):
     block = buildConvLayer(inputs)
     block = Conv2D(padding='same', filters=256, strides=1, kernel_size=3)(inputs)
     block = BatchNormalization()(block)
-    skip = Add()[inputs, block]
+    skip = Add()([inputs, block])
     skip = ReLU()(skip)
     return skip
 
 
-def relu_bn(inputs: tf) -> tf:
-    relu = ReLU()(inputs)
-    bn = BatchNormalization()(relu)
+def bn_relu(inputs):
+    relu = BatchNormalization()(inputs)
+    bn = ReLU()(relu)
     return bn
+
+
+theModel = build()
+plot_model(theModel, to_file='model_plot.png', show_shapes=True, show_layer_names=False)
