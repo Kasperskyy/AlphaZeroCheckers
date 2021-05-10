@@ -74,4 +74,4 @@ def bn_relu(inputs):
 
 
 theModel = build()
-plot_model(theModel, to_file='model_plot.png', show_shapes=True, show_layer_names=False)
+#plot_model(theModel, to_file='model_plot.png', show_shapes=True, show_layer_names=False)
