@@ -23,12 +23,14 @@ montecarlo = MonteCarlo(Node(chess_game))
 
 
 def build():
-    inputShape = (8, 8, 1)
+    inputShape = (4, 8, 17)
     inputs = Input(shape=inputShape)
     network = buildConvLayer(inputs)
     for i in range(10):
         network = buildResLayer(network)
-    model = Model(inputs, [buildPolicyHead(network), buildValueHead(network)])
+    value_head = buildValueHead(network)
+    policy_head = buildPolicyHead(network)
+    model = Model(inputs, [policy_head, value_head])
     return model
 
 
@@ -46,7 +48,7 @@ def buildPolicyHead(inputs):
     policy = Conv2D(filters=32, kernel_size=1, strides=1)(inputs)
     policy = bn_relu(policy)
     policy = Flatten()(policy)
-    policy = Dense(2048, activation='softmax')(policy)
+    policy = Dense(1024, activation='softmax')(policy)      # 32 x 4 x 8
     return policy
 
 
