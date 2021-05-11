@@ -1,28 +1,11 @@
 import numpy as np
-from montecarlo.node import Node
-from montecarlo.montecarlo import MonteCarlo
+
 from checkers.game import Game
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import BatchNormalization
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.layers import MaxPooling2D
-from tensorflow.keras.layers import Activation
-from tensorflow.keras.layers import Dropout
-from tensorflow.keras.layers import Lambda
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import Flatten
-from tensorflow.keras.layers import Input
-import tensorflow as tf
-from tensorflow.python.keras.layers import ReLU, Add
-from tensorflow.python.keras.utils.vis_utils import plot_model
 from enum import Enum
 import random
 import ResNetCheckers
 
-game = Game()
 
-board_size_x = game.board.width  # 4
-board_size_y = game.board.height  # 8
 
 # TO DO - TIDY and ujednolicic wszystkie slowniki i enumeracje
 class Player_id(Enum):
@@ -92,8 +75,8 @@ turns = {
 class HistoricalBoards:
 
     def __init__(self):
-        x = game.board.width
-        y = game.board.height
+        x = 4
+        y = 8
         self.historic_turns = np.zeros((x,y,2,2,7), dtype=np.int)        # 4x8x2x2x7
         # [x][y][2][black plane, white plane][7] - koordynacje, pozycje ktorego gracza, orientacja ktorego gracza, ile kolejek temu (o - aktualna, 1- 1 kolejka do tylu itp)
 
@@ -119,10 +102,12 @@ class HistoricalBoards:
         return black_plane, white_plane
 
 
-historical_boards = HistoricalBoards()
 
 
-def build_board_planes(plane_count):
+
+def build_board_planes(plane_count,historical_boards,game):
+    board_size_x = game.board.width
+    board_size_y = game.board.height
     board_planes = np.zeros((board_size_x, board_size_y, plane_count), dtype=np.int)
 
     current_player = game.whose_turn()
@@ -145,20 +130,4 @@ def build_board_planes(plane_count):
     return board_planes
 
 
-theModel = ResNetCheckers.build()
-
-while not (game.is_over()):
-    x = build_board_planes(17)
-
-    possible_moves = game.get_possible_moves()
-    rand_v = random.choice(possible_moves)
-    game.move(rand_v)
-    x = x[np.newaxis, :, :]
-    policy, value = theModel.predict(x)
-    print("CICHAJ")
-
-#if game.get_winner() is None:
-#    print("There is no winner")
-#else:
-#    print("And the winner iiiis player: ", game.get_winner())
 
