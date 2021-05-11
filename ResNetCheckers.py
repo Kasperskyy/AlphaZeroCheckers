@@ -16,10 +16,6 @@ import tensorflow as tf
 from tensorflow.python.keras.layers import ReLU, Add
 from tensorflow.python.keras.utils.vis_utils import plot_model
 
-game = Game()
-chess_game = Game()
-montecarlo = MonteCarlo(Node(chess_game))
-
 
 
 def build():
@@ -73,5 +69,4 @@ def bn_relu(inputs):
     return bn
 
 
-theModel = build()
 #plot_model(theModel, to_file='model_plot.png', show_shapes=True, show_layer_names=False)
