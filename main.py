@@ -21,7 +21,7 @@ def selfplay(numbgame, Model):
         # gameData[]
         montecarlo.child_finder = mcts.child_finder
         while not (game.is_over()):
-            #moveData[]
+           #moveData[]= consists of 3 elements- the game state, the search probabilties, the winner(added after game is over)
             montecarlo.simulate(1600)
             if(len(game.moves) <20):
                 montecarlo.root_node = montecarlo.make_exploratory_choice()
