@@ -18,18 +18,24 @@ def selfplay(numbgame, Model):
 
         montecarlo = MonteCarlo(Node(game))
         mcts = MCTS(Model)
+        # gameData[]
         montecarlo.child_finder = mcts.child_finder
         while not (game.is_over()):
+            #moveData[]
             montecarlo.simulate(1600)
             if(len(game.moves) <20):
                 montecarlo.root_node = montecarlo.make_exploratory_choice()
             else:
                 montecarlo.root_node = montecarlo.make_choice()
             game.move(montecarlo.root_node[-1])
-            prob = 
+            #add boardstate
+            #add probabilities
+            #gameData.app [nalesnikPauliny, gamevalue(-1/0/1) , probabilities]
         game.get_winner()
+        #petla zeby dodac odpowiednie game value
 
-
+    #array of moves.app(gameData)
+#  [array of moves [nalesnikPauliny, gamevalue(-1/0/1) , probabilities]  ]
 
 
         board_size_x = game.board.width  # 4
