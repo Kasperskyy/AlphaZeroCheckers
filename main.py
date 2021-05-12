@@ -30,7 +30,7 @@ def selfplay(numbgame, model):
         montecarlo.root_node.player_number = game.state.whose_turn()
 
         while not (game.is_over()):
-            currInput = InputBuilder.HistoricalBoards()
+            currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
             montecarlo.simulate(1)          # 1600
             if len(game.moves) < 20:
                 montecarlo.root_node = montecarlo.make_exploratory_choice()
