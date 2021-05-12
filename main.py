@@ -10,28 +10,35 @@ import MonteCarlo
 
 
 ##### PETLA GIER
+Model = None
+historicalBoards = None
+game = None
+currInput = None
 
 
-def selfplay(numbgame, Model):
+def selfplay(numbgame, model):
+    global game, Model, historicalBoards, currInput
+    Model = model
+
     for i in range(numbgame):
-
         game = Game()
 
         montecarlo = MonteCarlo(Node(game))
-        mcts = MonteCarlo.MCTS(Model)
         gameData = np.array()
-        montecarlo.child_finder = mcts.child_finder
+        historicalBoards = InputBuilder.HistoricalBoards()
+        montecarlo.child_finder = child_finder
+        montecarlo.root_node.player_number = game.state.whose_turn()
 
         while not (game.is_over()):
-            historicalBoards = InputBuilder.HistoricalBoards()
-            montecarlo.simulate(1600)
+            currInput = InputBuilder.HistoricalBoards()
+            montecarlo.simulate(1)          # 1600
             if len(game.moves) < 20:
                 montecarlo.root_node = montecarlo.make_exploratory_choice()
             else:
                 montecarlo.root_node = montecarlo.make_choice()
 
             # add boardstate
-            gameState = InputBuilder.build_board_planes(17, historicalBoards, game)
+            gameState = InputBuilder.build_board_planes(17, currInput, game)
 
             game.move(montecarlo.root_node[-1])
 
@@ -59,5 +66,15 @@ def selfplay(numbgame, Model):
         board_size_y = game.board.height  # 8
 
 
-historicalBoards = InputBuilder.HistoricalBoards()
+def child_finder(node, self):
+    x = currInput
+    x = x[np.newaxis, :, :]
+    expert_policy_values, win_value = Model.predict(x)
+    for move in node.state.get_possible_moves():
+        child = Node(deepcopy(node.state))
+        child.state.move(move)
+        child.player_number = child.state.whose_turn()
+        child.policy_value = InputBuilder.get_child_policy_value(move, expert_policy_values)  # should return a probability value between 0 and 1
+        node.add_child(child)
+    node.update_win_value(win_value)
 
