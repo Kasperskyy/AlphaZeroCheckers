@@ -112,8 +112,7 @@ def build_board_planes(plane_count, historical_boards: HistoricalBoards, game):
             x, y = getCoords(position, board_size_x, board_size_y, player_name[current_player])
             board_planes[x][y][turns[0][player]] = 1  # wstawianie 1 na pozycje gracza (w jego orientacji)
 
-    historical_boards.add_turn(board_planes[:, :, turns[0][1]], board_planes[:, :, turns[0][2]],
-                               current_player)
+    historical_boards.add_turn(board_planes[:, :, turns[0][1]], board_planes[:, :, turns[0][2]], current_player)
 
     for i in range(1, 7):
         black_plane, white_plane = historical_boards.get_turn(i, current_player)
@@ -125,7 +124,18 @@ def build_board_planes(plane_count, historical_boards: HistoricalBoards, game):
 
     return board_planes
 
-def get_child_policy_value(child,policy):
-   policy = policy[0]#correct me if im wrong
-   index = (len(policy)/32) * (child[0]-1) + child[1]-1 #policy is a 1d vector of length 1024. it includes 32 checkerboards, 1 checkerboard for each position. so for position 1, a move to position 5 will be encoded at index 4, and amove from 2 to 5 will be encoded at index 36
-   return policy[int(index)]
+
+def get_child_policy_value(child, policy):
+    policy = policy[0]                                              # correct me if im wrong
+    index = (len(policy) / 32) * (child[0] - 1) + child[1] - 1      # policy is a 1d vector of length 1024. it includes 32 checkerboards, 1 checkerboard for each position. so for position 1, a move to position 5 will be encoded at index 4, and amove from 2 to 5 will be encoded at index 36
+    return policy[int(index)]
+
+
+def convert_to_output(children, probabilities_value):
+    probabilities = np.zeros(1024)
+    counter = 0
+    for i in children:
+        index = (len(probabilities) / 32) * (i[0] - 1) + i[1] - 1
+        probabilities[int(index)] = probabilities_value[counter]
+        counter += 1
+    return probabilities
