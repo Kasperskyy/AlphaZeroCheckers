@@ -1,10 +1,20 @@
+from copy import deepcopy
+from montecarlo.node import Node
+from montecarlo.montecarlo import MonteCarlo
+from checkers.game import Game
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.layers import MaxPooling2D
+from tensorflow.keras.layers import Activation
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import Lambda
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Input
+import tensorflow as tf
 from tensorflow.python.keras.layers import ReLU, Add
+from tensorflow.python.keras.utils.vis_utils import plot_model
 
 
 class Network:
@@ -59,4 +69,4 @@ class Network:
         bn = ReLU()(relu)
         return bn
 
-        # plot_model(theModel, to_file='model_plot.png', show_shapes=True, show_layer_names=False)
+# plot_model(theModel, to_file='model_plot.png', show_shapes=True, show_layer_names=False)
