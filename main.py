@@ -6,8 +6,6 @@ from montecarlo.montecarlo import MonteCarlo
 from checkers.game import Game
 import InputBuilder
 import ResNetCheckers
-import MonteCarlo
-
 
 ##### PETLA GIER
 Model = None
@@ -24,46 +22,43 @@ def selfplay(numbgame, model):
         game = Game()
 
         montecarlo = MonteCarlo(Node(game))
-        gameData = np.array()
+        gameData = []
+        totalData = []
         historicalBoards = InputBuilder.HistoricalBoards()
         montecarlo.child_finder = child_finder
-        montecarlo.root_node.player_number = game.state.whose_turn()
+        print("game " + str(i))
+        montecarlo.root_node.player_number = game.whose_turn()
 
         while not (game.is_over()):
+            # game state
             currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
-            montecarlo.simulate(1)          # 1600
+            print("turn " + str(len(game.moves)))
+            montecarlo.simulate(2)  # 1600
+
+            probabilities_value = montecarlo.get_probabilities()
+            probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
+            currPlayer = game.whose_turn()
+
             if len(game.moves) < 20:
                 montecarlo.root_node = montecarlo.make_exploratory_choice()
             else:
                 montecarlo.root_node = montecarlo.make_choice()
+            montecarlo.root_node.visits = 0
 
-            # add boardstate
-            gameState = InputBuilder.build_board_planes(17, currInput, game)
+            game.move(montecarlo.root_node.state.moves[-1])
 
-            game.move(montecarlo.root_node[-1])
-
-            # add probabilities
-            probabilities = Node.get_score(montecarlo.root_node)        # TO DO - check if get_score is what we need
-
-            moveData = np.array(gameState, probabilities)  # moveData[]= consists of 3 elements- the game state, the search probabilities, the winner(added after game is over)
-            # gameData.app [nalesnikPauliny, probabilities, gamevalue(-1/0/1)]
+            moveData = [(currInput, probabilities, 0, currPlayer)]
+            gameData.append(moveData)
+            # moveData = np.append((currInput, probabilities))  # moveData[]= consists of 3 elements- the game state, the search probabilities, the winner(added after game is over)
 
         winner = game.get_winner()
-        if winner == 1:     # black
-            gameValue = 1
-        elif winner is None:
-            gameValue = 0
-        else:
-            gameValue = -1
-        moveData = np.append(gameValue)
-        gameData = np.append(moveData)
-
-        # array of moves.app(gameData)
-        history_moves = np.array(game.moves())
-        trainingSet = history_moves.append(gameData)   #  [array of moves [nalesnikPauliny, gamevalue(-1/0/1) , probabilities]  ]
-
-        board_size_x = game.board.width  # 4
-        board_size_y = game.board.height  # 8
+        for game in gameData[0]:
+            data = list(game)
+            if data[3] == winner:
+                data[2] = 1
+            else:
+                data[2] = -1
+            totalData.append((data[0], data[1], data[2]))
 
 
 def child_finder(node, self):
@@ -76,5 +71,6 @@ def child_finder(node, self):
         child.player_number = child.state.whose_turn()
         child.policy_value = InputBuilder.get_child_policy_value(move, expert_policy_values)  # should return a probability value between 0 and 1
         node.add_child(child)
-    node.update_win_value(win_value)
+    if node.parent is not None:
+        node.update_win_value(win_value)
 
