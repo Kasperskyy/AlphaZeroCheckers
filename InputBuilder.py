@@ -6,7 +6,6 @@ import random
 import ResNetCheckers
 
 
-
 # TO DO - TIDY and ujednolicic wszystkie slowniki i enumeracje
 class Player_id(Enum):
     BLACK_PLAYER = 1
@@ -77,35 +76,31 @@ class HistoricalBoards:
     def __init__(self):
         x = 4
         y = 8
-        self.historic_turns = np.zeros((x,y,2,2,7), dtype=np.int)        # 4x8x2x2x7
+        self.historic_turns = np.zeros((x, y, 2, 2, 7), dtype=np.int)  # 4x8x2x2x7
         # [x][y][2][black plane, white plane][7] - koordynacje, pozycje ktorego gracza, orientacja ktorego gracza, ile kolejek temu (o - aktualna, 1- 1 kolejka do tylu itp)
 
-
     def add_turn(self, black_plane, white_plane, current_player):
-        self.historic_turns = np.delete(self.historic_turns, 7-1, 4)
+        self.historic_turns = np.delete(self.historic_turns, 7 - 1, 4)
         turn3d1 = np.array([black_plane, white_plane])
         turn3d2 = np.array([np.rot90(black_plane, 2), np.rot90(white_plane, 2)])
 
-        if current_player == 1:     # black player
+        if current_player == 1:  # black player
             turn4d = np.array([turn3d1, turn3d2])
         else:
             turn4d = np.array([turn3d2, turn3d1])
 
-        turn4d = np.moveaxis(turn4d, 1, -1)      # changing 2x2x4x8 to 4x8x2x2 shape
+        turn4d = np.moveaxis(turn4d, 1, -1)  # changing 2x2x4x8 to 4x8x2x2 shape
         turn4d = np.moveaxis(turn4d, 0, -1)
 
         self.historic_turns = np.insert(self.historic_turns, 0, turn4d, 4)
 
     def get_turn(self, turn_count, current_player):
-        black_plane = self.historic_turns[:,:, player_number['black'], current_player-1, turn_count]
-        white_plane = self.historic_turns[:,:,player_number['white'], current_player-1, turn_count]
+        black_plane = self.historic_turns[:, :, player_number['black'], current_player - 1, turn_count]
+        white_plane = self.historic_turns[:, :, player_number['white'], current_player - 1, turn_count]
         return black_plane, white_plane
 
 
-
-
-
-def build_board_planes(plane_count,historical_boards,game):
+def build_board_planes(plane_count, historical_boards: HistoricalBoards, game):
     board_size_x = game.board.width
     board_size_y = game.board.height
     board_planes = np.zeros((board_size_x, board_size_y, plane_count), dtype=np.int)
@@ -115,19 +110,22 @@ def build_board_planes(plane_count,historical_boards,game):
         player_positions = game.board.searcher.player_positions[player]
         for position in player_positions:
             x, y = getCoords(position, board_size_x, board_size_y, player_name[current_player])
-            board_planes[x][y][turns[0][player]] = 1          # wstawianie 1 na pozycje gracza (w jego orientacji)
+            board_planes[x][y][turns[0][player]] = 1  # wstawianie 1 na pozycje gracza (w jego orientacji)
 
-    historical_boards.add_turn(board_planes[:,:,turns[0][1]], board_planes[:, :, turns[0][2]], current_player)
+    historical_boards.add_turn(board_planes[:, :, turns[0][1]], board_planes[:, :, turns[0][2]],
+                               current_player)
 
-    for i in range(1,7):
+    for i in range(1, 7):
         black_plane, white_plane = historical_boards.get_turn(i, current_player)
-        board_planes[:,:,turns[i][1]] = black_plane
+        board_planes[:, :, turns[i][1]] = black_plane
         board_planes[:, :, turns[i][2]] = white_plane
 
     if game.board.player_turn == Player_id.BLACK_PLAYER:
-        board_planes[:,:,(plane_count - 1)] = np.ones((board_size_x, board_size_y), dtype=int)
+        board_planes[:, :, (plane_count - 1)] = np.ones((board_size_x, board_size_y), dtype=int)
 
     return board_planes
 
-
-
+def get_child_policy_value(child,policy):
+   policy = policy[0]#correct me if im wrong
+   index = (len(policy)/32) * (child[0]-1) + child[1]-1 #policy is a 1d vector of length 1024. it includes 32 checkerboards, 1 checkerboard for each position. so for position 1, a move to position 5 will be encoded at index 4, and amove from 2 to 5 will be encoded at index 36
+   return policy[int(index)]
