@@ -48,7 +48,7 @@ class Network:
         policy = Conv2D(filters=32, kernel_size=1, strides=1)(inputs)
         policy = self.bn_relu(policy)
         policy = Flatten()(policy)
-        policy = Dense(1024, activation='softmax')(policy)  # 32 x 4 x 8
+        policy = Dense(256, activation='softmax')(policy)  # 32 x 4 x 8
         return policy
 
     def buildConvLayer(self, inputs):
