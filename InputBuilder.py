@@ -126,16 +126,51 @@ def build_board_planes(plane_count, historical_boards: HistoricalBoards, game):
 
 
 def get_child_policy_value(child, policy):
-    policy = policy[0]                                              # correct me if im wrong
-    index = (len(policy) / 32) * (child[0] - 1) + child[1] - 1      # policy is a 1d vector of length 1024. it includes 32 checkerboards, 1 checkerboard for each position. so for position 1, a move to position 5 will be encoded at index 4, and amove from 2 to 5 will be encoded at index 36
+    policy = policy[0]  # correct me if im wrong
+    rowType = 8 * round(child[0] / 8)
+    if rowType < child[0]:
+        distance = 0
+    else:
+        distance = 1
+    destination = policyIndex[distance][child[1] - child[0]]
+    index = (len(policy) / 32) * (child[0] - 1) + destination
     return policy[int(index)]
 
 
 def convert_to_output(children, probabilities_value):
-    probabilities = np.zeros(1024)
+    probabilities = np.zeros(256)
     counter = 0
     for i in children:
-        index = (len(probabilities) / 32) * (i[0] - 1) + i[1] - 1
+        rowType = 8 * round(i[0] / 8)
+        if rowType < i[0]:
+            distance = 0
+        else:
+            distance = 1
+        destination = policyIndex[distance][i[1] - i[0]]
+        destination = policyIndex[i[1] - i[0]]
+        index = (len(probabilities) / 32) * (i[0] - 1) + destination
         probabilities[int(index)] = probabilities_value[counter]
         counter += 1
     return probabilities
+
+
+policyIndex = {
+    0: {
+        5: 0,
+        4: 1,
+        -3: 2,
+        -4: 3,
+        9: 4,
+        7: 5,
+        -7: 6,
+        -9: 7},
+    1: {
+        4: 0,
+        3: 1,
+        -4: 2,
+        -5: 3,
+        9: 4,
+        7: 5,
+        -7: 6,
+        -9: 7}
+}
