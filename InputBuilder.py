@@ -147,7 +147,6 @@ def convert_to_output(children, probabilities_value):
         else:
             distance = 1
         destination = policyIndex[distance][i[1] - i[0]]
-        destination = policyIndex[i[1] - i[0]]
         index = (len(probabilities) / 32) * (i[0] - 1) + destination
         probabilities[int(index)] = probabilities_value[counter]
         counter += 1
