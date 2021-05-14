@@ -17,13 +17,12 @@ currInput = None
 def selfplay(numbgame, model):
     global game, Model, historicalBoards, currInput
     Model = model
-
+    totalData = []
     for i in range(numbgame):
         game = Game()
 
         montecarlo = MonteCarlo(Node(game))
         gameData = []
-        totalData = []
         historicalBoards = InputBuilder.HistoricalBoards()
         montecarlo.child_finder = child_finder
         print("game " + str(i))
@@ -33,7 +32,7 @@ def selfplay(numbgame, model):
             # game state
             currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
             print("turn " + str(len(game.moves)))
-            montecarlo.simulate(2)  # 1600
+            montecarlo.simulate(500)  # 1600 #dont put a value less than 2 !
 
             probabilities_value = montecarlo.get_probabilities()
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
@@ -46,19 +45,17 @@ def selfplay(numbgame, model):
             montecarlo.root_node.visits = 0
 
             game.move(montecarlo.root_node.state.moves[-1])
-
-            moveData = [(currInput, probabilities, 0, currPlayer)]
-            gameData.append(moveData)
-            # moveData = np.append((currInput, probabilities))  # moveData[]= consists of 3 elements- the game state, the search probabilities, the winner(added after game is over)
+            gameData.append((currInput, probabilities, 0, currPlayer))
 
         winner = game.get_winner()
-        for game in gameData[0]:
+        for game in gameData:
             data = list(game)
             if data[3] == winner:
                 data[2] = 1
             else:
                 data[2] = -1
             totalData.append((data[0], data[1], data[2]))
+    return totalData
 
 
 def child_finder(node, self):
@@ -73,4 +70,3 @@ def child_finder(node, self):
         node.add_child(child)
     if node.parent is not None:
         node.update_win_value(win_value)
-
