@@ -32,7 +32,7 @@ def selfplay(numbgame, model):
             # game state
             currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
             print("turn " + str(len(game.moves)))
-            montecarlo.simulate(500)  # 1600 #dont put a value less than 2 !
+            montecarlo.simulate(5)  # 1600 #dont put a value less than 2 !
 
             probabilities_value = montecarlo.get_probabilities()
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
