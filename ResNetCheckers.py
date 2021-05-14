@@ -33,6 +33,7 @@ class Network:
         value_head = self.buildValueHead(network)
         policy_head = self.buildPolicyHead(network)
         model = Model(inputs, [policy_head, value_head])
+        model.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=tf.keras.optimizers.Adam(0.0001))
         return model
 
     def buildValueHead(self, inputs):
