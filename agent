@@ -1,0 +1,31 @@
+import numpy as np
+from copy import deepcopy
+from montecarlo.node import Node
+from montecarlo.montecarlo import MonteCarlo
+from checkers.game import Game
+import main
+import InputBuilder
+
+
+
+
+class Agent:
+ def __init__(self,ishuman):
+     self.ishuman = ishuman
+     #self.model = model
+ def make_move(self,montecarlo = None):
+     if self.ishuman == True:
+         move=input("Give move!!!!!!\n")
+         move = move.split()
+         montecarlo.simulate(1)
+         move = [int(item) for item in move]
+         for x in montecarlo.root_node.children:
+             if x.state.moves[-1] == move:
+                 montecarlo.root_node = x
+                 break
+         return move
+     else:
+         montecarlo.simulate(5)
+         montecarlo.root_node = montecarlo.make_choice()
+         montecarlo.root_node.visits = 0
+         return montecarlo.root_node.state.moves[-1]
