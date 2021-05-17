@@ -8,3 +8,4 @@ model = myNetwork.getModel()
 #[print(o.shape, o.dtype) for o in model.outputs]
 trainingData = main.selfplay(1, model)
 Training.trainNetwork(model, trainingData)
+main.evaluate(model,model,2)
