@@ -1,27 +1,25 @@
-import random
 import numpy as np
 from copy import deepcopy
+
+from agent import Agent
 from montecarlo.node import Node
 from montecarlo.montecarlo import MonteCarlo
 from checkers.game import Game
 import InputBuilder
-import ResNetCheckers
 
 ##### PETLA GIER
-Model = None
 historicalBoards = None
 game = None
 currInput = None
 
 
 def selfplay(numbgame, model):
-    global game, Model, historicalBoards, currInput
-    Model = model
+    global game, historicalBoards, currInput
     totalData = []
     for i in range(numbgame):
         game = Game()
 
-        montecarlo = MonteCarlo(Node(game))
+        montecarlo = MonteCarlo(Node(game),model,model)
         gameData = []
         historicalBoards = InputBuilder.HistoricalBoards()
         montecarlo.child_finder = child_finder
@@ -32,7 +30,7 @@ def selfplay(numbgame, model):
             # game state
             currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
             print("turn " + str(len(game.moves)))
-            montecarlo.simulate(5)  # 1600 #dont put a value less than 2 !
+            montecarlo.simulate(2)  # 1600 #dont put a value less than 2 !
 
             probabilities_value = montecarlo.get_probabilities()
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
@@ -57,11 +55,33 @@ def selfplay(numbgame, model):
             totalData.append((data[0], data[1], data[2]))
     return totalData
 
+def evaluate(bestmodel,challenger,num_games):
+    p1 = Agent(True)
+    p2 = Agent(False)
+    challengervictory = 0;
+    for i in range(num_games):
+        game = Game()
+        montecarlo = MonteCarlo(Node(game),bestmodel,challenger)
+        montecarlo.child_finder = child_finder
+        montecarlo.root_node.player_number = game.whose_turn()
+        while not (game.is_over()):
+            print("turn " + str(len(game.moves)))
+            print("possible: " + str(game.get_possible_moves()))
+            if game.whose_turn() == 1:
+                move= p1.make_move(montecarlo)
+                montecarlo
+            else:
+                move = p2.make_move(montecarlo)
+            game.move(move)
+        if challenger.get_winner() == 2:
+            challengervictory = challengervictory + 1
+
+    return challengervictory/num_games
 
 def child_finder(node, self):
     x = currInput
     x = x[np.newaxis, :, :]
-    expert_policy_values, win_value = Model.predict(x)
+    expert_policy_values, win_value = self.model[node.player_number-1].predict(x)
     for move in node.state.get_possible_moves():
         child = Node(deepcopy(node.state))
         child.state.move(move)
@@ -70,3 +90,4 @@ def child_finder(node, self):
         node.add_child(child)
     if node.parent is not None:
         node.update_win_value(win_value)
+       
