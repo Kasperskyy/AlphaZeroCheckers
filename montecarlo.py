@@ -4,7 +4,8 @@ import numpy as np
 # library imparaai montecarlo - https://pypi.org/project/imparaai-montecarlo/
 class MonteCarlo:
 
-    def __init__(self, root_node):
+    def __init__(self, root_node,modelp1 = None,modelp2 = None):
+        self.model = [modelp1,modelp2]
         self.root_node = root_node
         self.child_finder = None
         self.node_evaluator = lambda child, montecarlo: None
