@@ -8,5 +8,4 @@ def trainNetwork(model, trainingData):
     yPolicy = np.asarray(yPolicy)
     yValue = [i[2] for i in trainingData]
     yValue = np.asarray(yValue)
-    model.fit(x=x, y=[yPolicy, yValue], batch_size=2048, epochs=10, verbose=1)
-
+    model.fit(x=x, y=[yPolicy, yValue], batch_size=2048, epochs=50, verbose=1)
