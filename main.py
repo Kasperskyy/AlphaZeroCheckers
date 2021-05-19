@@ -1,3 +1,5 @@
+from random import random
+
 import numpy as np
 from copy import deepcopy
 
@@ -15,6 +17,13 @@ currInput = None
 
 def selfplay(numbgame, model):
     global game, historicalBoards, currInput
+
+
+
+    doPrints = False # set to True to see console
+
+
+
     totalData = []
     for i in range(numbgame):
         game = Game()
@@ -23,14 +32,16 @@ def selfplay(numbgame, model):
         gameData = []
         historicalBoards = InputBuilder.HistoricalBoards()
         montecarlo.child_finder = child_finder
-        print("game " + str(i))
+        if doPrints:
+            print("game " + str(i))
         montecarlo.root_node.player_number = game.whose_turn()
 
         while not (game.is_over()):
             # game state
             currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
-            print("turn " + str(len(game.moves)))
-            montecarlo.simulate(2)  # 1600 #dont put a value less than 2 !
+            if doPrints:
+                print("turn " + str(len(game.moves)))
+            montecarlo.simulate(200)  # lets start with 200 and work our way up #dont put a value less than 2 !
 
             probabilities_value = montecarlo.get_probabilities()
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
@@ -56,27 +67,44 @@ def selfplay(numbgame, model):
     return totalData
 
 def evaluate(bestmodel,challenger,num_games):
-    p1 = Agent(True)
+
+
+
+    doPrints = False # chang to True to print information in console
+
+
+
+    p1 = Agent(False) #change to True to play yourself!
     p2 = Agent(False)
-    challengervictory = 0;
+    evaluationThreshold = 0.55 #new model must win 55% of games to be declared the winner
+    victoryCounter = 0;
+
     for i in range(num_games):
         game = Game()
-        montecarlo = MonteCarlo(Node(game),bestmodel,challenger)
+        if random.rand() < 0.5:  # who goes first- notice the order of parameters in the calling of MonteCarlo()
+            montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
+            challengerIndex = 2;
+        else:
+            montecarlo = MonteCarlo(Node(game), challenger, bestmodel)
+            challengerIndex = 1;
         montecarlo.child_finder = child_finder
         montecarlo.root_node.player_number = game.whose_turn()
         while not (game.is_over()):
-            print("turn " + str(len(game.moves)))
-            print("possible: " + str(game.get_possible_moves()))
+            if doPrints:
+                print("turn " + str(len(game.moves)))
+                print("possible: " + str(game.get_possible_moves()))
             if game.whose_turn() == 1:
-                move= p1.make_move(montecarlo)
+                move = p1.make_move(montecarlo)
                 montecarlo
             else:
                 move = p2.make_move(montecarlo)
             game.move(move)
-        if challenger.get_winner() == 2:
-            challengervictory = challengervictory + 1
-
-    return challengervictory/num_games
+        if game.get_winner() == challengerIndex:
+            victoryCounter += 1
+    if victoryCounter / num_games >= evaluationThreshold: #did you win 55% of the games at least?
+        return True
+    else:
+        return False
 
 def child_finder(node, self):
     x = currInput
@@ -90,4 +118,3 @@ def child_finder(node, self):
         node.add_child(child)
     if node.parent is not None:
         node.update_win_value(win_value)
-       
