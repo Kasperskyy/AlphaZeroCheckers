@@ -1,7 +1,3 @@
-from copy import deepcopy
-from montecarlo.node import Node
-from montecarlo.montecarlo import MonteCarlo
-from checkers.game import Game
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Conv2D
@@ -33,7 +29,7 @@ class Network:
         value_head = self.buildValueHead(network)
         policy_head = self.buildPolicyHead(network)
         model = Model(inputs, [policy_head, value_head])
-        model.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=tf.keras.optimizers.Adam(0.0001))
+        model.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=tf.keras.optimizers.Adam(0.2))
         return model
 
     def buildValueHead(self, inputs):
