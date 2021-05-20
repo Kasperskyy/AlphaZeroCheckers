@@ -2,7 +2,7 @@ import keras.models
 import ResNetCheckers
 import main
 import Training
-import numpy as np
+from keras import backend as k
 
 
 #!!!!!  When loading a model instead of making a new one, uncomment the loadfile command
@@ -13,7 +13,7 @@ myNetwork = ResNetCheckers.Network()
 #from file
 
 #model = keras.models.load_model('AlphaZeroCheckersModel') ###path of file here
-
+#k.set_value(model.optimizer.learning_rate, 0.02)
 model = myNetwork.getModel()
 #[print(i.shape, i.dtype) for i in model.inputs]
 #[print(o.shape, o.dtype) for o in model.outputs]
