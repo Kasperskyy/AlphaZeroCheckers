@@ -1,3 +1,15 @@
+## IMPORTS
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+
+from tensorboard.compat.proto.config_pb2 import ConfigProto
+
+
+from copy import deepcopy
+from montecarlo.node import Node
+from montecarlo.montecarlo import MonteCarlo
+from checkers.game import Game
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Conv2D
@@ -12,6 +24,13 @@ import tensorflow as tf
 from tensorflow.python.keras.layers import ReLU, Add
 from tensorflow.python.keras.utils.vis_utils import plot_model
 
+# allocate 60% of GPU memory
+from keras.backend import set_session
+config = tf.compat.v1.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.7
+session = tf.compat.v1.InteractiveSession(config=config)
+
+
 
 class Network:
     def __init__(self):
@@ -24,12 +43,12 @@ class Network:
         inputShape = (4, 8, 17)
         inputs = Input(shape=inputShape)
         network = self.buildConvLayer(inputs)
-        for i in range(10):
+        for i in range(15):
             network = self.buildResLayer(network)
         value_head = self.buildValueHead(network)
         policy_head = self.buildPolicyHead(network)
         model = Model(inputs, [policy_head, value_head])
-        model.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=tf.keras.optimizers.Adam(0.2))
+        model.compile(loss=['categorical_crossentropy', 'mean_squared_error'], optimizer=tf.keras.optimizers.Adam(0.0001))
         return model
 
     def buildValueHead(self, inputs):
