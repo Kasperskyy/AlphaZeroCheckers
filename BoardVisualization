@@ -1,0 +1,77 @@
+from random import random, Random
+from checkers.board import Board
+from checkers.piece import Piece
+from checkers.game import Game
+import numpy as np
+
+game = Game()
+random = Random()
+board = Board()
+
+
+# ● ○
+# print("\033[1;32;40m Bright Green  \n")
+def getCoords(position, gameWidth, gameHeight, orientation):
+    if position % gameWidth == 0:
+        x = gameWidth - 1
+    else:
+        x = (position % gameWidth) - 1
+    y = (position - 1) // gameWidth
+    if orientation == "black":
+        x = gameWidth - 1 - x
+        y = gameHeight - 1 - y
+    return x, y
+
+
+'''
+Kod niżej wypełnia macierz na wzor planszy do warcab (co dwa pola)
+matrix = np.zeros((8, 8), dtype=int)
+
+Player WHITE
+matrix[0,1::2] = "2"
+matrix[1,::2] = "2"
+matrix[2,1::2] = "2"
+
+Player BLACK
+matrix[5,::2] = "1"
+matrix[6,1::2] = "1"
+matrix[7,::2] = "1"
+
+print(matrix)
+'''
+
+
+
+# def gameBoard(game):
+
+matrix = np.zeros((8, 8), dtype=int)
+while not (game.is_over()):
+
+    print(game.whose_turn())
+    print(game.get_possible_moves())
+
+    possible_moves = game.get_possible_moves()
+    rand_v = random.choice(possible_moves)
+    print(rand_v)
+    matrix = np.zeros((8, 8), dtype=int)
+    game.move(rand_v)
+
+    # board.searcher.get_positions_by_player(game.whose_turn())
+    occupied = board.searcher.player_positions
+
+    for i in range(len(occupied[1])):
+        x, y = getCoords(occupied[1][i], 8, 8, "black")
+        matrix[x][y] = 1
+        # matrix[x, ::2] = 1
+    for i in range(len(occupied[2])):
+        x, y = getCoords(occupied[2][i], 8, 8, "white")
+        matrix[x][y] = 2
+        # matrix[x, ::2] = 2
+
+    print(matrix)
+
+
+if game.get_winner() is None:
+    print("There is no winner")
+else:
+    print("And the winner iiiis player: ", game.get_winner())
