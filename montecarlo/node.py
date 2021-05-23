@@ -15,17 +15,25 @@ class Node:
         self.player_number = None
         self.discovery_factor = 0.35
 
+        # our additions
+        self.original_player = None
+        self.historical_boards = None
 
-    def update_win_value(self, value):
+    def update_win_value(self, value, callingPlayer):
+        newValue=value
+        # changed by us
+        multiplier = 1
+        if callingPlayer != self.original_player:
+            multiplier = -1
         if self.visits != 0:
-            newValue = self.win_value*self.visits
-            value += newValue
-            value = value / (self.visits + 1)
-        self.win_value = value
-        self.visits += 1
+            sum = self.win_value * self.visits
+            sum += (newValue * multiplier)
+            newValue = sum / (self.visits + 1)
 
+        self.win_value = newValue
+        self.visits += 1
         if self.parent:
-            self.parent.update_win_value(value)
+            self.parent.update_win_value(value, callingPlayer)
 
     def update_policy_value(self, value):
         self.policy_value = value
@@ -38,33 +46,33 @@ class Node:
         for child in children:
             self.add_child(child)
 
-    def get_preferred_child(self, root_node):
+    def get_preferred_child(self, callingPlayer):
         best_children = []
         best_score = float('-inf')
 
         for child in self.children:
-            score = child.get_score(root_node)
+            score = child.get_score(callingPlayer)
 
             if score > best_score:
                 best_score = score
                 best_children = [child]
             elif score == best_score:
                 best_children.append(child)
-
         return random.choice(best_children)
 
-    def get_score(self, root_node):
+    def get_score(self, callingPlayer):
         # -------------- Our code
         if self.parent.visits == 0:
             discovery_operand = float('inf')
         else:
-            discovery_operand = self.discovery_factor * (self.policy_value or 1) * sqrt(log(self.parent.visits) / (self.visits or 1))
+            discovery_operand = self.discovery_factor * (self.policy_value or 1) * sqrt(
+                log(self.parent.visits) / (self.visits or 1))
         # --------------//old one - discovery_operand = self.discovery_factor * (self.policy_value or 1) * sqrt(log(self.parent.visits) / (self.visits or 1))
 
         '''
         maybe nothing
         '''
-        win_multiplier = 1 if self.parent.player_number == root_node.player_number else -1
+        win_multiplier = 1 if self.original_player == callingPlayer else -1
         win_operand = win_multiplier * self.win_value / (self.visits or 1)
         self.score = win_operand + discovery_operand
         return self.score
