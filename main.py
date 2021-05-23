@@ -34,14 +34,16 @@ def selfplay(numbgame, model):
 
         while not (game.is_over()):
             # game state
-            currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
+
             if doPrints:
                 print("turn " + str(len(game.moves)))
-            montecarlo.simulate(40)  # lets start with 200 and work our way up #dont put a value less than 2 !
+            currPlayer = game.whose_turn()
+            currInput = InputBuilder.build_board_planes(17, historicalBoards, game, currPlayer)
+            montecarlo.simulate(40, currPlayer)  # lets start with 200 and work our way up #dont put a value less than 2 !
 
             probabilities_value = montecarlo.get_probabilities()
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
-            currPlayer = game.whose_turn()
+
 
             if len(game.moves) < 20:
                 montecarlo.root_node = montecarlo.make_exploratory_choice()
@@ -110,20 +112,24 @@ def evaluate(bestmodel, challenger, num_games):
     return victoryCounter / num_games
 
 
-def child_finder(node, self):
-    global currInput,game
+def child_finder(node, self, callingPlayer):
+
     '''
     currINPUT FOR CURRENT STATE OF THE GAME!
     '''
-    x = currInput
 
+    if node.historical_boards is None:
+        node.historical_boards = InputBuilder.HistoricalBoards()
+    x = InputBuilder.build_board_planes(17, node.historical_boards, node.state, callingPlayer)
     x = x[np.newaxis, :, :]
-    expert_policy_values, win_value = self.model[game.whose_turn() - 1].predict(x)
+    node.original_player = callingPlayer
+    expert_policy_values, win_value = self.model[callingPlayer-1].predict(x)
     for move in node.state.get_possible_moves():
         child = Node(deepcopy(node.state))
         child.state.move(move)
+        child.historical_boards = deepcopy(node.historical_boards)
         child.player_number = child.state.whose_turn()
         child.policy_value = InputBuilder.get_child_policy_value(move, expert_policy_values)  # should return a probability value between 0 and 1
         node.add_child(child)
     if node.parent is not None:
-        node.update_win_value(win_value)
+        node.update_win_value(float(win_value), callingPlayer)
