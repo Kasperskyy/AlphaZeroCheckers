@@ -49,7 +49,8 @@ def selfplay(numbgame, model):
                 montecarlo.root_node = montecarlo.make_exploratory_choice()
             else:
                 montecarlo.root_node = montecarlo.make_choice()
-            montecarlo.root_node.visits -= 1
+            if montecarlo.root_node.visits != 0:
+                montecarlo.root_node.visits -= 1
 
             game.move(montecarlo.root_node.state.moves[-1])
             gameData.append((currInput, probabilities, 0, currPlayer))
@@ -75,14 +76,14 @@ def evaluate(bestmodel, challenger, num_games):
 
     for i in range(num_games):
         game = Game()
-        historicalBoards = InputBuilder.HistoricalBoards()
+
         if random.random() < 0.5:  # who goes first
-            p1 = Agent(True)  # change to True to play yourself!
-            p2 = Agent(False)
+            p1 = Agent(True, 1)  # change to True to play yourself!
+            p2 = Agent(False, 2)
             challengerIndex = 2
         else:
-            p1 = Agent(False)  # change to True to play yourself!
-            p2 = Agent(True)
+            p1 = Agent(False, 1)  # change to True to play yourself!
+            p2 = Agent(True, 2)
             challengerIndex = 1
          #   montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
          #   challengerIndex = 2
@@ -92,7 +93,7 @@ def evaluate(bestmodel, challenger, num_games):
         montecarlo.child_finder = child_finder
         montecarlo.root_node.player_number = game.whose_turn()
         while not (game.is_over()):
-            currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
+            #currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
             if doPrints:
                 print("turn " + str(len(game.moves)))
                 print("possible: " + str(game.get_possible_moves()))
