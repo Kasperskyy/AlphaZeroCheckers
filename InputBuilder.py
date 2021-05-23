@@ -95,29 +95,28 @@ class HistoricalBoards:
         self.historic_turns = np.insert(self.historic_turns, 0, turn4d, 4)
 
     def get_turn(self, turn_count, current_player):
-        black_plane = self.historic_turns[:, :, player_number['black'], current_player - 1, turn_count]
-        white_plane = self.historic_turns[:, :, player_number['white'], current_player - 1, turn_count]
+        black_plane = self.historic_turns[:, :, player_number['black'], current_player - 1, turn_count - 1]
+        white_plane = self.historic_turns[:, :, player_number['white'], current_player - 1, turn_count - 1]
         return black_plane, white_plane
 
 
-def build_board_planes(plane_count, historical_boards: HistoricalBoards, game):
+def build_board_planes(plane_count, historical_boards: HistoricalBoards, game, currPlayer):
     board_size_x = game.board.width
     board_size_y = game.board.height
     board_planes = np.zeros((board_size_x, board_size_y, plane_count), dtype=np.int)
 
-    current_player = game.whose_turn()
+    current_player = currPlayer
     for player in game.board.searcher.player_positions:
         player_positions = game.board.searcher.player_positions[player]
         for position in player_positions:
             x, y = getCoords(position, board_size_x, board_size_y, player_name[current_player])
             board_planes[x][y][turns[0][player]] = 1  # wstawianie 1 na pozycje gracza (w jego orientacji)
-
-    historical_boards.add_turn(board_planes[:, :, turns[0][1]], board_planes[:, :, turns[0][2]], current_player)
-
-    for i in range(1, 7):
+    for i in range(1, 8):
         black_plane, white_plane = historical_boards.get_turn(i, current_player)
         board_planes[:, :, turns[i][1]] = black_plane
         board_planes[:, :, turns[i][2]] = white_plane
+
+    historical_boards.add_turn(board_planes[:, :, turns[0][1]], board_planes[:, :, turns[0][2]], current_player)
 
     if game.board.player_turn == Player_id.BLACK_PLAYER:
         board_planes[:, :, (plane_count - 1)] = np.ones((board_size_x, board_size_y), dtype=int)
