@@ -6,4 +6,4 @@ https://pypi.org/project/imparaai-checkers/
 https://pypi.org/project/imparaai-montecarlo/
 
 ### ***NEW FILE*** 
-The main of a file "TestInput" is to build an input for neural network.
+"BoardVisualization" file IS ONLY A TEST FILE -> IT IS NOT FINISHED.
