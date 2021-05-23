@@ -23,12 +23,12 @@ class MonteCarlo:
 
         return random.choice(best_children)
 
-    # -------------------Our code
+    #function added by us
     def get_probabilities(self):
         children_visits = map(lambda child: child.visits, self.root_node.children)
         children_visit_probabilities = [visit / self.root_node.visits for visit in children_visits]
         return children_visit_probabilities
-    # -------------------
+
 
     def make_exploratory_choice(self):
         children_visits = map(lambda child: child.visits, self.root_node.children)
@@ -42,27 +42,27 @@ class MonteCarlo:
 
             probabilities_already_counted += probability
 
-    def simulate(self, expansion_count=1):
+    def simulate(self, expansion_count=1, currentPlayer=None):
         for i in range(expansion_count):
             current_node = self.root_node
 
             while current_node.expanded:
-                current_node = current_node.get_preferred_child(self.root_node)
+                current_node = current_node.get_preferred_child(currentPlayer)
 
-            self.expand(current_node)
+            self.expand(current_node, currentPlayer)
 
-    def expand(self, node):
-        self.child_finder(node, self)
-
-        for child in node.children:
-            child_win_value = self.node_evaluator(child, self)
-
-            if child_win_value != None:
-                child.update_win_value(child_win_value)
-
-            if not child.is_scorable():
-                self.random_rollout(child)
-                child.children = []
+    def expand(self, node, currentPlayer):
+        self.child_finder(node, self, currentPlayer)
+        #rolloutccode commented out as we don't need it
+        #for child in node.children:
+        #    child_win_value = self.node_evaluator(child, self)
+        #
+        #    if child_win_value != None:
+        #        child.update_win_value(child_win_value)
+        #
+        #    if not child.is_scorable():
+        #        self.random_rollout(child)
+        #        child.children = []
 
         if len(node.children):
             node.expanded = True
