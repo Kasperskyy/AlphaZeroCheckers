@@ -7,3 +7,4 @@ https://pypi.org/project/imparaai-montecarlo/
 
 ### ***NEW FILE*** 
 "BoardVisualization" file IS ONLY A TEST FILE -> IT IS NOT FINISHED.
+
