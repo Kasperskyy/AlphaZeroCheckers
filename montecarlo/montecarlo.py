@@ -1,11 +1,16 @@
 import random
+from copy import deepcopy
+
 import numpy as np
 
 # library imparaai montecarlo - https://pypi.org/project/imparaai-montecarlo/
+from montecarlo.node import Node
+
+
 class MonteCarlo:
 
-    def __init__(self, root_node,modelp1 = None,modelp2 = None):
-        self.model = [modelp1,modelp2]
+    def __init__(self, root_node, modelp1=None, modelp2=None):
+        self.model = [modelp1, modelp2]
         self.root_node = root_node
         self.child_finder = None
         self.node_evaluator = lambda child, montecarlo: None
@@ -23,12 +28,11 @@ class MonteCarlo:
 
         return random.choice(best_children)
 
-    #function added by us
+    # function added by us
     def get_probabilities(self):
         children_visits = map(lambda child: child.visits, self.root_node.children)
         children_visit_probabilities = [visit / self.root_node.visits for visit in children_visits]
         return children_visit_probabilities
-
 
     def make_exploratory_choice(self):
         children_visits = map(lambda child: child.visits, self.root_node.children)
@@ -53,8 +57,8 @@ class MonteCarlo:
 
     def expand(self, node, currentPlayer):
         self.child_finder(node, self, currentPlayer)
-        #rolloutccode commented out as we don't need it
-        #for child in node.children:
+        # rolloutccode commented out as we don't need it
+        # for child in node.children:
         #    child_win_value = self.node_evaluator(child, self)
         #
         #    if child_win_value != None:
@@ -77,3 +81,27 @@ class MonteCarlo:
             node.update_win_value(child_win_value)
         else:
             self.random_rollout(child)
+
+    '''
+               picks a random move from the avaiable moves
+               checks if this node is alReady in the mcts tree
+               if it is, set it as the root node, subtract 1 from visits
+               if it isn't, add it with zero visits and set as root node
+               '''
+
+    def non_user_expand(self, currentPlayer, move):
+        found = False
+        for x in self.root_node.children:
+            if x.state.moves[-1] == move:
+                self.root_node = x
+                if self.root_node.visits != 0:
+                    self.root_node.visits -= 1
+                found = True
+                break
+        if not found:
+            child = Node(deepcopy(self.root_node.state))
+            child.state.move(move)
+            child.historical_boards = deepcopy(self.root_node.historical_boards)
+            child.player_number = child.state.whose_turn()
+            self.root_node.add_child(child)
+            self.root_node = child
