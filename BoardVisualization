@@ -9,7 +9,7 @@ random = Random()
 
 
 # ● ○
-print("\033[1;32;40m \n")
+#print("\033[1;32;40m \n")
 
 def getCoords(position, gameWidth, gameHeight, orientation):
     if position % gameWidth == 0:
@@ -65,7 +65,7 @@ while not (game.is_over()):
         matrix[x][y] = player_number
         matrix_is_king[x][y] = is_king
 
-
+    from sty import fg, bg, ef, rs
     display_matrix = np.rot90(matrix,3)
     matrix_is_king = np.rot90(matrix_is_king,3)
     for i in range(8):
@@ -73,19 +73,19 @@ while not (game.is_over()):
         for j in range(8):
             add_str = str(display_matrix[i][j])     # 1 2 0
             if add_str == '0':
-                add_str = "-"
+                add_str = "\033[0m" + "-"
             if add_str == '1':
                 if matrix_is_king[i][j]:
-                    add_str = 'A'
+                    add_str = fg.black + 'A'
                 else:
-                    add_str = 'a'
+                    add_str = fg.black + 'a'
             if add_str == '2':
                 if matrix_is_king[i][j]:
-                    add_str = 'B'
+                    add_str = fg.white + 'B'
                 else:
-                    add_str = 'b'
+                    add_str = fg.white + 'b'
             row_str = row_str + add_str + " "
-        print(row_str)
+        print(row_str+"\033[0m")
 
     print(game.whose_turn())
     print(game.get_possible_moves())
