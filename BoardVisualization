@@ -6,11 +6,11 @@ import numpy as np
 
 game = Game()
 random = Random()
-board = Board()
 
 
 # ● ○
-# print("\033[1;32;40m Bright Green  \n")
+print("\033[1;32;40m \n")
+
 def getCoords(position, gameWidth, gameHeight, orientation):
     if position % gameWidth == 0:
         x = gameWidth - 1
@@ -45,7 +45,47 @@ print(matrix)
 # def gameBoard(game):
 
 matrix = np.zeros((8, 8), dtype=int)
+matrix_is_king = np.zeros((8,8),dtype=bool)
+
 while not (game.is_over()):
+
+    occupied = game.board.searcher.player_positions
+
+    #for positions in position_pieces.values():
+    list_positions = list(game.board.searcher.position_pieces.values())
+    for i in list_positions:
+        is_king = i.king
+        player_number = i.player
+        curr_position = i.position
+        if curr_position < 5 or (13 > curr_position > 8) or (21 > curr_position > 16) or (29 > curr_position > 24):
+            curr_position = curr_position * 2
+        else:
+            curr_position = curr_position * 2 - 1
+        x, y = getCoords(position=curr_position, gameWidth=8, gameHeight=8, orientation="black")
+        matrix[x][y] = player_number
+        matrix_is_king[x][y] = is_king
+
+
+    display_matrix = np.rot90(matrix,3)
+    matrix_is_king = np.rot90(matrix_is_king,3)
+    for i in range(8):
+        row_str = ""
+        for j in range(8):
+            add_str = str(display_matrix[i][j])     # 1 2 0
+            if add_str == '0':
+                add_str = "-"
+            if add_str == '1':
+                if matrix_is_king[i][j]:
+                    add_str = 'A'
+                else:
+                    add_str = 'a'
+            if add_str == '2':
+                if matrix_is_king[i][j]:
+                    add_str = 'B'
+                else:
+                    add_str = 'b'
+            row_str = row_str + add_str + " "
+        print(row_str)
 
     print(game.whose_turn())
     print(game.get_possible_moves())
@@ -53,25 +93,16 @@ while not (game.is_over()):
     possible_moves = game.get_possible_moves()
     rand_v = random.choice(possible_moves)
     print(rand_v)
+
     matrix = np.zeros((8, 8), dtype=int)
+    matrix_is_king = np.zeros((8, 8), dtype=bool)
     game.move(rand_v)
 
-    # board.searcher.get_positions_by_player(game.whose_turn())
-    occupied = board.searcher.player_positions
-
-    for i in range(len(occupied[1])):
-        x, y = getCoords(occupied[1][i], 8, 8, "black")
-        matrix[x][y] = 1
-        # matrix[x, ::2] = 1
-    for i in range(len(occupied[2])):
-        x, y = getCoords(occupied[2][i], 8, 8, "white")
-        matrix[x][y] = 2
-        # matrix[x, ::2] = 2
-
-    print(matrix)
 
 
 if game.get_winner() is None:
     print("There is no winner")
 else:
     print("And the winner iiiis player: ", game.get_winner())
+
+
