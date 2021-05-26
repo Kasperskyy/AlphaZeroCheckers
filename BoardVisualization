@@ -1,119 +1,136 @@
-from random import random, Random
-from checkers.board import Board
-from checkers.piece import Piece
-from checkers.game import Game
+import random
+
 import numpy as np
-from sty import fg, bg, ef, rs
+from copy import deepcopy
 
-game = Game()
-random = Random()
+from agent import Agent
+from montecarlo.node import Node
+from montecarlo.montecarlo import MonteCarlo
+from checkers.game import Game
+import InputBuilder
 
-
-# ● ○
-# print("\033[1;32;40m \n")
-
-def getCoords(position, gameWidth, gameHeight, orientation):
-    if position % gameWidth == 0:
-        x = gameWidth - 1
-    else:
-        x = (position % gameWidth) - 1
-    y = (position - 1) // gameWidth
-    if orientation == "black":
-        x = gameWidth - 1 - x
-        y = gameHeight - 1 - y
-    return x, y
+##### PETLA GIER
+historicalBoards = None
+game = None
+currInput = None
 
 
-matrix = np.zeros((8, 8), dtype=int)
-matrix_is_king = np.zeros((8, 8), dtype=bool)
-template_matrix = np.array([[0, 32, 0, 31, 0, 30, 0, 29],
-                            [28, 0, 27, 0, 26, 0, 25, 0],
-                            [0, 24, 0, 23, 0, 22, 0, 21],
-                            [20, 0, 19, 0, 18, 0, 17, 0],
-                            [0, 16, 0, 15, 0, 14, 0, 13],
-                            [12, 0, 11, 0, 10, 0, 9, 0, ],
-                            [0, 8, 0, 7, 0, 6, 0, 5],
-                            [4, 0, 3, 0, 2, 0, 1, 0]], dtype=int)
+def selfplay(numbgame, model):
+    global game, historicalBoards, currInput
+
+    doPrints = False  # set to True to see console
+
+    totalData = []
+    for i in range(numbgame):
+        game = Game()
+
+        montecarlo = MonteCarlo(Node(game), model, model)
+        gameData = []
+        historicalBoards = InputBuilder.HistoricalBoards()
+        montecarlo.child_finder = child_finder
+        if doPrints:
+            print("game " + str(i))
+        montecarlo.root_node.player_number = game.whose_turn()
+
+        while not (game.is_over()):
+            # game state
+
+            if doPrints:
+                print("turn " + str(len(game.moves)))
+            currPlayer = game.whose_turn()
+            currInput = InputBuilder.build_board_planes(17, historicalBoards, game, currPlayer)
+            montecarlo.simulate(40, currPlayer)  # lets start with 200 and work our way up #dont put a value less than 2 !
+
+            probabilities_value = montecarlo.get_probabilities()
+            probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
 
 
-# TO DO:
-# ustawic logike wyswietlania, najpierw ruch a pozniej obraz planszy czy jakos tam, trzeba sprawdzic
-# zrobic ramke dookola planszy, szablonu planszy, z wypisanymi mozliwymi ruchami, czyja kolej i jaki ruch zostal wybrany
-# dodac printy dla: czyja kolej, mozliwe ruchy, wybrany ruch
+            if len(game.moves) < 20:
+                montecarlo.root_node = montecarlo.make_exploratory_choice()
+            else:
+                montecarlo.root_node = montecarlo.make_choice()
+            if montecarlo.root_node.visits != 0:
+                montecarlo.root_node.visits -= 1
 
-while not (game.is_over()):
+            game.move(montecarlo.root_node.state.moves[-1])
+            gameData.append((currInput, probabilities, 0, currPlayer))
 
-    print(game.whose_turn())
-    print(game.get_possible_moves())
-    possible_moves = game.get_possible_moves()
-    rand_v = random.choice(possible_moves)
-    print(rand_v)
+        winner = game.get_winner()
+        for game in gameData:
+            data = list(game)
+            if data[3] == winner:
+                data[2] = 1
+            else:
+                data[2] = -1
+            totalData.append((data[0], data[1], data[2]))
+    return totalData
 
-    occupied = game.board.searcher.player_positions
 
-    list_positions = list(game.board.searcher.position_pieces.values())
-    for i in list_positions:
-        is_king = i.king
-        player_number = i.player
-        curr_position = i.position
-        if curr_position < 5 or (13 > curr_position > 8) or (21 > curr_position > 16) or (29 > curr_position > 24):
-            curr_position = curr_position * 2
+def evaluate(bestmodel, challenger, num_games):
+    global game, historicalBoards, currInput
+    doPrints = False  # ChangHe to True to print information in console
+
+
+    evaluationThreshold = 0.55  # new model must win 55% of games to be declared the winner
+    victoryCounter = 0
+
+    for i in range(num_games):
+        game = Game()
+
+        if random.random() < 0.5:  # who goes first
+            p1 = Agent(True, 1)  # change to True to play yourself!
+            p2 = Agent(False, 2)
+            challengerIndex = 2
         else:
-            curr_position = curr_position * 2 - 1
-        x, y = getCoords(position=curr_position, gameWidth=8, gameHeight=8, orientation="black")
-        matrix[x][y] = player_number
-        matrix_is_king[x][y] = is_king
+            p1 = Agent(False, 1)  # change to True to play yourself!
+            p2 = Agent(True, 2)
+            challengerIndex = 1
+         #   montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
+         #   challengerIndex = 2
+        #else:
+        montecarlo = MonteCarlo(Node(game), challenger, bestmodel)
 
-    display_matrix = np.rot90(matrix, 3)
-    matrix_is_king = np.rot90(matrix_is_king, 3)
+        montecarlo.child_finder = child_finder
+        montecarlo.root_node.player_number = game.whose_turn()
+        while not (game.is_over()):
+            #currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
+            if doPrints:
+                print("turn " + str(len(game.moves)))
+                print("possible: " + str(game.get_possible_moves()))
+            if game.whose_turn() == 1:
+                move = p1.make_move(montecarlo)
+            else:
+                move = p2.make_move(montecarlo)
+            if doPrints:
+                print(move)
+            game.move(move)
+        if game.get_winner() == challengerIndex:
+            victoryCounter += 1
+    #if victoryCounter / num_games >= evaluationThreshold:  # did you win 55% of the games at least?
+        #return True
+    #else:
+     #   return False
+    return victoryCounter / num_games
 
-    for i in range(8):
-        row_str = ""
-        template_str = ""
-        for j in range(8):
-            ## Template matrix
-            templ_str = str(template_matrix[i][j])
-            if templ_str == '0':
-                templ_str = "\033[0m" + " _ "
-            if templ_str == '4':
-                templ_str = "  " + templ_str
-            if templ_str == '5':
-                templ_str = templ_str + "  "
-            if templ_str == '8':
-                templ_str = templ_str + " "
-            if templ_str == '6':
-                templ_str = templ_str + " "
-            if templ_str == '9':
-                templ_str = templ_str + " "
-            if templ_str == '2':
-                templ_str = templ_str + " "
-            if templ_str == '1':
-                templ_str = templ_str + " "
 
-            ## Game matrix
-            add_str = str(display_matrix[i][j])  # 1 2 0
-            if add_str == '0':
-                add_str = "\033[0m" + " _ "
-            if add_str == '1':
-                if matrix_is_king[i][j]:
-                    add_str = fg.black + ' A '
-                else:
-                    add_str = fg.black + ' ● '
-            if add_str == '2':
-                if matrix_is_king[i][j]:
-                    add_str = fg.white + ' B '
-                else:
-                    add_str = fg.white + ' ● '
+def child_finder(node, self, callingPlayer):
 
-            row_str = row_str + add_str + "\033[0m" + "|"
-            template_str = template_str + templ_str + "\033[0m" + "|"
-        print(row_str + "       " + "|" + template_str)
+    '''
+    currINPUT FOR CURRENT STATE OF THE GAME!
+    '''
 
-    matrix = np.zeros((8, 8), dtype=int)
-    matrix_is_king = np.zeros((8, 8), dtype=bool)
-    game.move(rand_v)
-
-if game.get_winner() is None:
-    print("There is no winner")
-else:
-    print("And the winner iiiis player: ", game.get_winner())
+    if node.historical_boards is None:
+        node.historical_boards = InputBuilder.HistoricalBoards()
+    x = InputBuilder.build_board_planes(17, node.historical_boards, node.state, callingPlayer)
+    x = x[np.newaxis, :, :]
+    node.original_player = callingPlayer
+    expert_policy_values, win_value = self.model[callingPlayer-1].predict(x)
+    for move in node.state.get_possible_moves():
+        child = Node(deepcopy(node.state))
+        child.state.move(move)
+        child.historical_boards = deepcopy(node.historical_boards)
+        child.player_number = child.state.whose_turn()
+        child.policy_value = InputBuilder.get_child_policy_value(move, expert_policy_values)  # should return a probability value between 0 and 1
+        node.add_child(child)
+    if node.parent is not None:
+        node.update_win_value(float(win_value), callingPlayer)
