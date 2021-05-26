@@ -18,7 +18,7 @@ currInput = None
 def selfplay(numbgame, model):
     global game, historicalBoards, currInput
 
-    doPrints = False  # set to True to see console
+    doPrints = True  # set to True to see console
 
     totalData = []
     for i in range(numbgame):
@@ -68,7 +68,7 @@ def selfplay(numbgame, model):
 
 def evaluate(bestmodel, challenger, num_games):
     global game, historicalBoards, currInput
-    doPrints = False  # ChangHe to True to print information in console
+    doPrints = True  # ChangHe to True to print information in console
 
 
     evaluationThreshold = 0.55  # new model must win 55% of games to be declared the winner
@@ -78,13 +78,15 @@ def evaluate(bestmodel, challenger, num_games):
         game = Game()
 
         if random.random() < 0.5:  # who goes first
-            p1 = Agent(True, 1)  # change to True to play yourself!
-            p2 = Agent(False, 2)
+            p1 = Agent(0, 1)  # change to True to play yourself!
+            p2 = Agent(2, 2)
             challengerIndex = 2
+            print("You are black!")
         else:
-            p1 = Agent(False, 1)  # change to True to play yourself!
-            p2 = Agent(True, 2)
+            p1 = Agent(2, 1)  # change to True to play yourself!
+            p2 = Agent(0, 2)
             challengerIndex = 1
+            print("You are white!")
          #   montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
          #   challengerIndex = 2
         #else:
@@ -94,15 +96,17 @@ def evaluate(bestmodel, challenger, num_games):
         montecarlo.root_node.player_number = game.whose_turn()
         while not (game.is_over()):
             #currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
+
             if doPrints:
-                print("turn " + str(len(game.moves)))
-                print("possible: " + str(game.get_possible_moves()))
+                if(p1.ishuman == False and p2.ishuman == False):
+                    print("turn " + str(len(game.moves)))
+                    print("possible: " + str(game.get_possible_moves()))
             if game.whose_turn() == 1:
-                move = p1.make_move(montecarlo)
+                move = p1.make_move(montecarlo, game)
             else:
-                move = p2.make_move(montecarlo)
-            if doPrints:
-                print(move)
+                move = p2.make_move(montecarlo, game)
+            # if doPrints:
+               # print(move)
             game.move(move)
         if game.get_winner() == challengerIndex:
             victoryCounter += 1
