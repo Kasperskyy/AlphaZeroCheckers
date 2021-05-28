@@ -123,7 +123,7 @@ class Agent:
             montecarlo.non_user_expand(self.number, move)
             return move
         else:
-            montecarlo.simulate(2, self.number)
+            montecarlo.simulate(60, self.number)
             montecarlo.root_node = montecarlo.make_choice()
             if montecarlo.root_node.visits != 0:
                 montecarlo.root_node.visits -= 1
