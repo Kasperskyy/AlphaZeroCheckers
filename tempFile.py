@@ -10,12 +10,12 @@ from keras import backend as k
 # !!!!!  When loading a model instead of making a new one, uncomment the loadfile command
 
 # from scratch
-myNetwork = ResNetCheckers.Network()
-model = myNetwork.getModel()
+#myNetwork = ResNetCheckers.Network()
+#model = myNetwork.getModel()
 victory_threshold = 0.55
 # from file
-#model = keras.models.load_model('AlphaZeroCheckersModel') ###path of file here
-#k.set_value(model.optimizer.learning_rate, 0.0001)
+model = keras.models.load_model('AlphaZeroCheckersModel') ###path of file here
+k.set_value(model.optimizer.learning_rate, 0.0001)
 
 # [print(i.shape, i.dtype) for i in model.inputs]
 # [print(o.shape, o.dtype) for o in model.outputs]
