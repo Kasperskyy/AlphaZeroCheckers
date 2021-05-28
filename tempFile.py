@@ -5,6 +5,7 @@ import keras.models
 import ResNetCheckers
 import main
 import Training
+import pickle
 from keras import backend as k
 
 # !!!!!  When loading a model instead of making a new one, uncomment the loadfile command
@@ -37,6 +38,8 @@ for i in range(1000):
     else:
         print("test failed!")
         additionalData = trainingData
+        with open("TrainingData.txt", "wb") as fp:
+            pickle.dump(trainingData, fp)
     #Training.trainNetwork(model, trainingData)
     # if i % 10 == 0:
    # model.save('AlphaZeroCheckersModel')  ###path of file here
