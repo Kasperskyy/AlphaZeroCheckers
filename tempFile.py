@@ -22,13 +22,13 @@ victory_threshold = 0.55
 additionalData = []
 for i in range(1000):
     print("iteration: ", i)
-    trainingData = main.selfplay(2, model)  # generate self play data
+    trainingData = main.selfplay(100, model)  # generate self play data
     trainingData = trainingData + additionalData
     newModel = myNetwork.build()  # create new model to train
     newModel.set_weights(model.get_weights())  # copy weights
     Training.trainNetwork(newModel, trainingData)  # training loop
     # ##the next 6 lines can be commented to omit evaluation
-    isNewNetworkBetter = main.evaluate(model, newModel, 2) #evaluate model
+    isNewNetworkBetter = main.evaluate(model, newModel, 100) #evaluate model
     #print(main.evaluate(model, model, 10))
     if isNewNetworkBetter > victory_threshold:
         model = newModel
