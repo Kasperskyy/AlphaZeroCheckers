@@ -78,19 +78,21 @@ def evaluate(bestmodel, challenger, num_games):
         game = Game()
 
         if random.random() < 0.5:  # who goes first
-            p1 = Agent(0, 1)  # change to True to play yourself!
+            p1 = Agent(2, 1)  # change to True to play yourself!
             p2 = Agent(2, 2)
             challengerIndex = 2
+            montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
             print("You are black!")
         else:
             p1 = Agent(2, 1)  # change to True to play yourself!
-            p2 = Agent(0, 2)
+            p2 = Agent(2, 2)
             challengerIndex = 1
+            montecarlo = MonteCarlo(Node(game), challenger, bestmodel)
             print("You are white!")
          #   montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
          #   challengerIndex = 2
         #else:
-        montecarlo = MonteCarlo(Node(game), challenger, bestmodel)
+
 
         montecarlo.child_finder = child_finder
         montecarlo.root_node.player_number = game.whose_turn()
@@ -98,7 +100,7 @@ def evaluate(bestmodel, challenger, num_games):
             #currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
 
             if doPrints:
-                if(p1.ishuman == False and p2.ishuman == False):
+                if(p1.botcategory == 0 and p2.botcategory == 0):
                     print("turn " + str(len(game.moves)))
                     print("possible: " + str(game.get_possible_moves()))
             if game.whose_turn() == 1:
