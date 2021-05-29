@@ -17,7 +17,7 @@ class Agent:
         self.number = number
         # self.model = model
 
-       def make_move(self, montecarlo=None, game=None):
+    def make_move(self, montecarloActive=None, montecarloPassive=None, game=None):
         if self.botcategory == 0:
             print(
                 "==============================================================================================================")
@@ -98,33 +98,29 @@ class Agent:
             print("possible: " + str(game.get_possible_moves()))
             move = input("Give move!!!!!!\n")
             move = move.split()
-            ###function(ideally inside montecarlo class) that
             move[0]=int(move[0])
             move[1] = int(move[1])
-            '''
-            picks a random move from the avaiable moves
-            checks if this node is alReady in the mcts tree
-            if it is, set it as the root node, subtract 1 from visits
-            if it isn't, add it with zero visits and set as root node
-            '''
+
             print(
                 "==============================================================================================================")
-            possible_moves = []
-            for x in montecarlo.root_node.state.get_possible_moves():
-                possible_moves.append(x)
+            #possible_moves = []
+            #for x in montecarloActive.root_node.state.get_possible_moves():
+                #possible_moves.append(x)
             #move = random.choice(possible_moves)
-            montecarlo.non_user_expand(self.number, move)
+            montecarloActive.non_user_expand(self.number, move)
             return move
         elif self.botcategory == 1:
             possible_moves = []
-            for x in montecarlo.root_node.state.get_possible_moves():
+            for x in montecarloActive.root_node.state.get_possible_moves():
                 possible_moves.append(x)
             move = random.choice(possible_moves)
-            montecarlo.non_user_expand(self.number, move)
+            montecarloActive.non_user_expand(self.number, move)
             return move
         else:
-            montecarlo.simulate(60, self.number)
-            montecarlo.root_node = montecarlo.make_choice()
-            if montecarlo.root_node.visits != 0:
-                montecarlo.root_node.visits -= 1
-            return montecarlo.root_node.state.moves[-1]
+            montecarloActive.simulate(2, self.number)
+            montecarloActive.root_node = montecarloActive.make_choice()
+            if montecarloActive.root_node.visits != 0:
+                montecarloActive.root_node.visits -= 1
+            if montecarloPassive is not None:
+                montecarloPassive.non_user_expand(montecarloActive.root_node.state.whose_turn(), montecarloActive.root_node.state.moves[-1])
+            return montecarloActive.root_node.state.moves[-1]
