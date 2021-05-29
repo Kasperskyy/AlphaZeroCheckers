@@ -24,7 +24,7 @@ def selfplay(numbgame, model):
     for i in range(numbgame):
         game = Game()
 
-        montecarlo = MonteCarlo(Node(game), model, model)
+        montecarlo = MonteCarlo(Node(game), model)
         gameData = []
         historicalBoards = InputBuilder.HistoricalBoards()
         montecarlo.child_finder = child_finder
@@ -39,7 +39,7 @@ def selfplay(numbgame, model):
                 print("turn " + str(len(game.moves)))
             currPlayer = game.whose_turn()
             currInput = InputBuilder.build_board_planes(17, historicalBoards, game, currPlayer)
-            montecarlo.simulate(40, currPlayer)  # lets start with 200 and work our way up #dont put a value less than 2 !
+            montecarlo.simulate(2, currPlayer)  # lets start with 200 and work our way up #dont put a value less than 2 !
 
             probabilities_value = montecarlo.get_probabilities()
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
@@ -81,32 +81,36 @@ def evaluate(bestmodel, challenger, num_games):
             p1 = Agent(2, 1)  # change to True to play yourself!
             p2 = Agent(2, 2)
             challengerIndex = 2
-            montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
+            montecarloP1 = MonteCarlo(Node(game), bestmodel)
+            montecarloP2 = MonteCarlo(Node(game), challenger)
             print("You are black!")
         else:
             p1 = Agent(2, 1)  # change to True to play yourself!
             p2 = Agent(2, 2)
             challengerIndex = 1
-            montecarlo = MonteCarlo(Node(game), challenger, bestmodel)
+            montecarloP1 = MonteCarlo(Node(game), challenger)
+            montecarloP2 = MonteCarlo(Node(game), bestmodel)
             print("You are white!")
          #   montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
          #   challengerIndex = 2
         #else:
 
 
-        montecarlo.child_finder = child_finder
-        montecarlo.root_node.player_number = game.whose_turn()
+        montecarloP1.child_finder = child_finder
+        montecarloP2.child_finder = child_finder
+        montecarloP1.root_node.player_number = 1
+        montecarloP2.root_node.player_number = 2
         while not (game.is_over()):
             #currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
 
             if doPrints:
-                if(p1.botcategory == 0 and p2.botcategory == 0):
+                if p1.botcategory == 0 and p2.botcategory == 0:
                     print("turn " + str(len(game.moves)))
                     print("possible: " + str(game.get_possible_moves()))
             if game.whose_turn() == 1:
-                move = p1.make_move(montecarlo, game)
+                move = p1.make_move(montecarloP1, montecarloP2, game)
             else:
-                move = p2.make_move(montecarlo, game)
+                move = p2.make_move(montecarloP2, montecarloP1, game)
             # if doPrints:
                # print(move)
             game.move(move)
@@ -130,7 +134,7 @@ def child_finder(node, self, callingPlayer):
     x = InputBuilder.build_board_planes(17, node.historical_boards, node.state, callingPlayer)
     x = x[np.newaxis, :, :]
     node.original_player = callingPlayer
-    expert_policy_values, win_value = self.model[callingPlayer-1].predict(x)
+    expert_policy_values, win_value = self.model.predict(x)
     for move in node.state.get_possible_moves():
         child = Node(deepcopy(node.state))
         child.state.move(move)
@@ -140,3 +144,4 @@ def child_finder(node, self, callingPlayer):
         node.add_child(child)
     if node.parent is not None:
         node.update_win_value(float(win_value), callingPlayer)
+
