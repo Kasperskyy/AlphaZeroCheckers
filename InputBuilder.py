@@ -1,40 +1,41 @@
+from enum import Enum
 import numpy as np
 
-from checkers.game import Game
-from enum import Enum
-import random
-import ResNetCheckers
 
-
-# TO DO - TIDY and ujednolicic wszystkie slowniki i enumeracje
 class Player_id(Enum):
     BLACK_PLAYER = 1
     WHITE_PLAYER = 2
 
 
+# Dictionaries
+policyIndex = {
+    0: {
+        5: 0,
+        4: 1,
+        -3: 2,
+        -4: 3,
+        9: 4,
+        7: 5,
+        -7: 6,
+        -9: 7},
+    1: {
+        4: 0,
+        3: 1,
+        -4: 2,
+        -5: 3,
+        9: 4,
+        7: 5,
+        -7: 6,
+        -9: 7}
+}
 player_name = {
     1: "black",
     2: "white"
 }
-
 player_number = {
     "black": 0,
     "white": 1
 }
-
-
-def getCoords(position, gameWidth, gameHeight, orientation):
-    if position % gameWidth == 0:
-        x = gameWidth - 1
-    else:
-        x = (position % gameWidth) - 1
-    y = (position - 1) // gameWidth
-    if orientation == "black":
-        x = gameWidth - 1 - x
-        y = gameHeight - 1 - y
-    return x, y
-
-
 turns = {
     0: {
         Player_id.BLACK_PLAYER.value: 0,
@@ -71,25 +72,38 @@ turns = {
 }
 
 
+def getCoords(position, gameWidth, gameHeight, orientation):
+    if position % gameWidth == 0:
+        x = gameWidth - 1
+    else:
+        x = (position % gameWidth) - 1
+    y = (position - 1) // gameWidth
+    if orientation == "black":
+        x = gameWidth - 1 - x
+        y = gameHeight - 1 - y
+    return x, y
+
+
 class HistoricalBoards:
 
     def __init__(self):
         x = 4
         y = 8
         self.historic_turns = np.zeros((x, y, 2, 2, 7), dtype=np.int)  # 4x8x2x2x7
-        # [x][y][2][black plane, white plane][7] - koordynacje, pozycje ktorego gracza, orientacja ktorego gracza, ile kolejek temu (o - aktualna, 1- 1 kolejka do tylu itp)
+        # [x][y][2][black plane OR white plane][7] - koordynacje x , koordynacje y,
+        # pozycje ktorego gracza, orientacja ktorego gracza, ile kolejek temu (0 - aktualna, 1- 1 kolejka do tylu itp)
 
     def add_turn(self, black_plane, white_plane, current_player):
         self.historic_turns = np.delete(self.historic_turns, 7 - 1, 4)
         turn3d1 = np.array([black_plane, white_plane])
         turn3d2 = np.array([np.rot90(black_plane, 2), np.rot90(white_plane, 2)])
 
-        if current_player == 1:  # black player
+        if current_player == 1:                     # black player
             turn4d = np.array([turn3d1, turn3d2])
         else:
             turn4d = np.array([turn3d2, turn3d1])
 
-        turn4d = np.moveaxis(turn4d, 1, -1)  # changing 2x2x4x8 to 4x8x2x2 shape
+        turn4d = np.moveaxis(turn4d, 1, -1)         # changing 2x2x4x8 to 4x8x2x2 shape
         turn4d = np.moveaxis(turn4d, 0, -1)
 
         self.historic_turns = np.insert(self.historic_turns, 0, turn4d, 4)
@@ -104,13 +118,13 @@ def build_board_planes(plane_count, historical_boards: HistoricalBoards, game, c
     board_size_x = game.board.width
     board_size_y = game.board.height
     board_planes = np.zeros((board_size_x, board_size_y, plane_count), dtype=np.int)
-
     current_player = currPlayer
+
     for player in game.board.searcher.player_positions:
         player_positions = game.board.searcher.player_positions[player]
         for position in player_positions:
             x, y = getCoords(position, board_size_x, board_size_y, player_name[current_player])
-            board_planes[x][y][turns[0][player]] = 1  # wstawianie 1 na pozycje gracza (w jego orientacji)
+            board_planes[x][y][turns[0][player]] = 1  # put 1 on the player's position (in his orientation)
     for i in range(1, 8):
         black_plane, white_plane = historical_boards.get_turn(i, current_player)
         board_planes[:, :, turns[i][1]] = black_plane
@@ -125,7 +139,7 @@ def build_board_planes(plane_count, historical_boards: HistoricalBoards, game, c
 
 
 def get_child_policy_value(child, policy):
-    policy = policy[0]  # correct me if im wrong
+    policy = policy[0]
     rowType = 8 * round(child[0] / 8)
     if rowType < child[0]:
         distance = 0
@@ -150,25 +164,3 @@ def convert_to_output(children, probabilities_value):
         probabilities[int(index)] = probabilities_value[counter]
         counter += 1
     return probabilities
-
-
-policyIndex = {
-    0: {
-        5: 0,
-        4: 1,
-        -3: 2,
-        -4: 3,
-        9: 4,
-        7: 5,
-        -7: 6,
-        -9: 7},
-    1: {
-        4: 0,
-        3: 1,
-        -4: 2,
-        -5: 3,
-        9: 4,
-        7: 5,
-        -7: 6,
-        -9: 7}
-}
