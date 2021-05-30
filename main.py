@@ -39,7 +39,7 @@ def selfplay(numbgame, model):
                 print("turn " + str(len(game.moves)))
             currPlayer = game.whose_turn()
             currInput = InputBuilder.build_board_planes(17, historicalBoards, game, currPlayer)
-            montecarlo.simulate(60, currPlayer)  # lets start with 200 and work our way up #dont put a value less than 2 !
+            montecarlo.simulate(2, currPlayer)  # lets start with 200 and work our way up #dont put a value less than 2 !
 
             probabilities_value = montecarlo.get_probabilities()
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
@@ -65,7 +65,6 @@ def selfplay(numbgame, model):
             totalData.append((data[0], data[1], data[2]))
     return totalData
 
-
 def evaluate(bestmodel, challenger, num_games):
     global game, historicalBoards, currInput
     doPrints = True  # ChangHe to True to print information in console
@@ -76,8 +75,8 @@ def evaluate(bestmodel, challenger, num_games):
 
     for i in range(num_games):
         game = Game()
-        p1 = Agent(2, 1)  # change to True to play yourself!
-        p2 = Agent(2, 2)
+        p1 = Agent(2, 1, False)  # change to True to play yourself!
+        p2 = Agent(2, 2, False)
         if random.random() < 0.5:  # who goes first
             challengerIndex = 2
             montecarloP1 = MonteCarlo(Node(game), bestmodel)
@@ -122,6 +121,107 @@ def evaluate(bestmodel, challenger, num_games):
      #   return False
     return victoryCounter / num_games
 
+def evaluateplayer(model, num_games, player1, player2):
+    global game, historicalBoards, currInput
+    doPrints = True  # ChangHe to True to print information in console
+
+
+    evaluationThreshold = 0.55  # new model must win 55% of games to be declared the winner
+    victoryCounter = 0
+    visualizable = int(
+        input("Do you want game to be visualizable 0(not_visualizable), 1(visualizable):\n"))
+    cheer = int(input("Choose cheer player to cheer 0(human), 1(random), 2(alphazero):\n"))
+    for i in range(num_games):
+        game = Game()
+        if (player1 == 0 and player2 == 1) or (player1 == 1 and player2 == 0):
+
+            if random.random() < 0.5:  # who goes first
+                p1 = Agent(0, 1,visualizable)  # change to True to play yourself!
+                p2 = Agent(1, 2,visualizable)
+                if cheer == 0:
+                    challengerIndex = 1
+                else:
+                    challengerIndex = 2
+                print("You are black!")
+            else:
+                p1 = Agent(1, 1,visualizable)  # change to True to play yourself!
+                p2 = Agent(0, 2,visualizable)
+                if cheer == 0:
+                    challengerIndex = 2
+                else:
+                    challengerIndex = 1
+                print("You are white!")
+        elif (player1 == 0 and player2 == 2) or (player1 == 2 and player2 == 0):
+            if random.random() < 0.5:  # who goes first
+                p1 = Agent(0, 1,visualizable)  # change to True to play yourself!
+                p2 = Agent(2, 2,visualizable)
+                if cheer == 0:
+                    challengerIndex = 1
+                else:
+                    challengerIndex = 2
+                print("You are black!")
+            else:
+                p1 = Agent(2, 1,visualizable)  # change to True to play yourself!
+                p2 = Agent(0, 2,visualizable)
+                if cheer == 0:
+                    challengerIndex = 2
+                else:
+                    challengerIndex = 1
+                print("You are white!")
+        elif (player1 == 1 and player2 == 2) or (player1 == 2 and player2 == 1):
+            if random.random() < 0.5:  # who goes first
+                p1 = Agent(1, 1,visualizable)  # change to True to play yourself!
+                p2 = Agent(2, 2,visualizable)
+                if cheer == 1:
+                    challengerIndex = 1
+                else:
+                    challengerIndex = 2
+            else:
+                p1 = Agent(2, 1,visualizable)  # change to True to play yourself!
+                p2 = Agent(1, 2,visualizable)
+                if cheer == 1:
+                    challengerIndex = 2
+                else:
+                    challengerIndex = 1
+        #if random.random() < 0.5:  # who goes first
+        #   p1 = Agent(0, 1)  # change to True to play yourself!
+        #  p2 = Agent(2, 2)
+        # challengerIndex = 2
+        #print("You are black!")
+        #else:
+        #   p1 = Agent(2, 1)  # change to True to play yourself!
+        #  p2 = Agent(0, 2)
+        # challengerIndex = 1
+        #print("You are white!")
+        #   montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
+        #   challengerIndex = 2
+        #else:
+        montecarlo = MonteCarlo(Node(game), model)
+
+        montecarlo.child_finder = child_finder
+        montecarlo.root_node.player_number = game.whose_turn()
+        while not (game.is_over()):
+            #currInput = InputBuilder.build_board_planes(17, historicalBoards, game)
+
+            if doPrints:
+                if(p1.botcategory != 0 and p2.botcategory != 0):
+                    print("turn " + str(len(game.moves)))
+                    #print("possible: " + str(game.get_possible_moves()))
+            if game.whose_turn() == 1:
+                move = p1.make_move(montecarloActive = montecarlo, game = game, montecarloPassive = None)
+            else:
+                move = p2.make_move(montecarloActive = montecarlo, game = game, montecarloPassive = None)
+            # if doPrints:
+               # print(move)
+            game.move(move)
+        if game.get_winner() == challengerIndex:
+            victoryCounter += 1
+    #if victoryCounter / num_games >= evaluationThreshold:  # did you win 55% of the games at least?
+        #return True
+    #else:
+     #   return False
+    return victoryCounter / num_games
+
 
 def child_finder(node, self, callingPlayer):
 
@@ -144,4 +244,3 @@ def child_finder(node, self, callingPlayer):
         node.add_child(child)
     if node.parent is not None:
         node.update_win_value(float(win_value), callingPlayer)
-
