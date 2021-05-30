@@ -18,7 +18,7 @@ currInput = None
 def selfplay(numbgame, model):
     global game, historicalBoards, currInput
 
-    doPrints = True  # set to True to see console
+    doPrints = False  # set to True to see console
 
     totalData = []
     for i in range(numbgame):
@@ -39,7 +39,7 @@ def selfplay(numbgame, model):
                 print("turn " + str(len(game.moves)))
             currPlayer = game.whose_turn()
             currInput = InputBuilder.build_board_planes(17, historicalBoards, game, currPlayer)
-            montecarlo.simulate(2, currPlayer)  # lets start with 200 and work our way up #dont put a value less than 2 !
+            montecarlo.simulate(60, currPlayer)  # lets start with 200 and work our way up #dont put a value less than 2 !
 
             probabilities_value = montecarlo.get_probabilities()
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
@@ -76,24 +76,19 @@ def evaluate(bestmodel, challenger, num_games):
 
     for i in range(num_games):
         game = Game()
-
+        p1 = Agent(2, 1)  # change to True to play yourself!
+        p2 = Agent(2, 2)
         if random.random() < 0.5:  # who goes first
-            p1 = Agent(2, 1)  # change to True to play yourself!
-            p2 = Agent(2, 2)
             challengerIndex = 2
             montecarloP1 = MonteCarlo(Node(game), bestmodel)
             montecarloP2 = MonteCarlo(Node(game), challenger)
-            print("You are black!")
         else:
-            p1 = Agent(2, 1)  # change to True to play yourself!
-            p2 = Agent(2, 2)
             challengerIndex = 1
             montecarloP1 = MonteCarlo(Node(game), challenger)
             montecarloP2 = MonteCarlo(Node(game), bestmodel)
-            print("You are white!")
          #   montecarlo = MonteCarlo(Node(game), bestmodel, challenger)
          #   challengerIndex = 2
-        #else:
+        print(challengerIndex)
 
 
         montecarloP1.child_finder = child_finder
@@ -116,6 +111,11 @@ def evaluate(bestmodel, challenger, num_games):
             game.move(move)
         if game.get_winner() == challengerIndex:
             victoryCounter += 1
+            print("chall dub")
+        elif game.get_winner() == None:
+            print("tie")
+        else:
+            print("loss")
     #if victoryCounter / num_games >= evaluationThreshold:  # did you win 55% of the games at least?
         #return True
     #else:
