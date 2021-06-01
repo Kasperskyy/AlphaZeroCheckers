@@ -13,7 +13,7 @@ class Node:
         self.children = []
         self.expanded = False
         self.player_number = None
-        self.discovery_factor = 0.35
+        self.discovery_factor = 1
 
         ### below code is added by us
         self.original_player = None
@@ -67,12 +67,14 @@ class Node:
             discovery_operand = float('inf')
             win_operand = 0
         else:
-            discovery_operand = self.discovery_factor * (self.policy_value or 1) * sqrt(log(self.parent.visits) / (self.visits or 1))
+            discovery_operand = self.discovery_factor * (self.policy_value or 1) * ((sqrt(self.parent.visits))/(1 + self.visits))
             win_multiplier = 1 if self.original_player == callingPlayer else -1
             win_operand = win_multiplier * self.win_value / (self.visits or 1)
         self.score = win_operand + discovery_operand
         return self.score
         ###
+
+
 
     def is_scorable(self):
         return self.visits or self.policy_value != None
