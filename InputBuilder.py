@@ -155,7 +155,7 @@ def convert_to_output(children, probabilities_value):
     probabilities = np.zeros(256)
     counter = 0
     for i in children:
-        rowType = 8 * round(i[0] / 8)
+        rowType = 8 * np.math.floor(((i[0] - 1) / 8)+0.5)
         if rowType < i[0]:
             distance = 0
         else:
