@@ -26,8 +26,8 @@ trainingData = []
 # [print(o.shape, o.dtype) for o in model.outputs]
 #with open("TrainingData.txt", "rb") as fp:   # Unpickling
 #    additionalData = pickle.load(fp)
-print("Choose 1 to training\n")
-print("Choose 2 to selfplay\n")
+print("Choose 1 to generate self play and train\n")
+print("Choose 2 to test against other agents\n")
 choopaczups = int(input("Choose mode:\n"))
 if choopaczups == 1:
     for i in range(1000):
@@ -35,30 +35,30 @@ if choopaczups == 1:
 
         trainingData = gamePlayer.selfplay(1, model)  # generate self play data
 
-        #with open("TrainingDataADDITIONAL.txt", "wb") as fp:
-        #   pickle.dump(trainingData, fp)
+        with open("TrainingData.txt", "wb") as fp:
+           pickle.dump(trainingData, fp)
 
-        trainingData = trainingData + additionalData
-        newModel = keras.models.load_model('AlphaZeroCheckersModel')  ###path of file here
-        k.set_value(newModel.optimizer.learning_rate, 0.0001)
-        Training.trainNetwork(newModel, trainingData)  # training loop
+        #trainingData = trainingData + additionalData
+        #newModel = keras.models.load_model('AlphaZeroCheckersModel')  ###path of file here
+        #k.set_value(newModel.optimizer.learning_rate, 0.0001)
+        #Training.trainNetwork(newModel, trainingData)  # training loop
 
         # ##the next 6 lines can be commented to omit evaluation
-        isNewNetworkBetter = gamePlayer.evaluate(model, newModel, 1)  # evaluate model #CHANGE TO 50 GIER
+        #isNewNetworkBetter = gamePlayer.evaluate(model, newModel, 1)  # evaluate model #CHANGE TO 50 GIER
         # print(main.evaluate(model, model, 10))
 
-        if isNewNetworkBetter > victory_threshold:
-            print(str(isNewNetworkBetter))
-            model = newModel
-            print("test passed!")
-            additionalData = []
-            model.save('AlphaZeroCheckersModel')  ###path of file here
-            print("model saved!")
-        else:
-            print("test failed!")
-            print(str(isNewNetworkBetter))
-            additionalData = trainingData
-            #with open("TrainingData.txt", "wb") as fp:
+        #if isNewNetworkBetter > victory_threshold:
+        #    print(str(isNewNetworkBetter))
+        #    model = newModel
+        #    print("test passed!")
+        #    additionalData = []
+        #    model.save('AlphaZeroCheckersModel')  ###path of file here
+        #    print("model saved!")
+        #else:
+        #    print("test failed!")
+        #    print(str(isNewNetworkBetter))
+        #    additionalData = trainingData
+        #    with open("TrainingData.txt", "wb") as fp:
             #    pickle.dump(trainingData, fp)
         # Training.trainNetwork(model, trainingData)
         # if i % 10 == 0:
