@@ -15,13 +15,14 @@ class Node:
         self.player_number = None
         self.discovery_factor = 0.35
 
-        # our additions
+        ### below code is added by us
         self.original_player = None
         self.historical_boards = None
+        ###
 
     def update_win_value(self, value, callingPlayer):
+        ### below code is modified by us
         newValue=value
-        # changed by us
         multiplier = 1
         if callingPlayer != self.original_player:
             multiplier = -1
@@ -34,7 +35,7 @@ class Node:
         self.visits += 1
         if self.parent:
             self.parent.update_win_value(value, callingPlayer)
-
+        ###
     def update_policy_value(self, value):
         self.policy_value = value
 
@@ -60,7 +61,7 @@ class Node:
                 best_children.append(child)
         return random.choice(best_children)
 
-        def get_score(self, callingPlayer):
+    def get_score(self, callingPlayer):
         ###Below code is modified by us
         if self.original_player is None:
             discovery_operand = float('inf')
