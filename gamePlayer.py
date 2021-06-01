@@ -102,7 +102,7 @@ def evaluate(bestmodel, challenger, num_games):
 
 def evaluateplayer(model, num_games, player1, player2):
     global game, historicalBoards, currInput
-    doPrints = True
+    doPrints = False
 
     victoryCounter = 0
     drawCounter = 0
