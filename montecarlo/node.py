@@ -60,22 +60,18 @@ class Node:
                 best_children.append(child)
         return random.choice(best_children)
 
-    def get_score(self, callingPlayer):
-        # -------------- Our code
-        if self.parent.visits == 0:
+        def get_score(self, callingPlayer):
+        ###Below code is modified by us
+        if self.original_player is None:
             discovery_operand = float('inf')
+            win_operand = 0
         else:
-            discovery_operand = self.discovery_factor * (self.policy_value or 1) * sqrt(
-                log(self.parent.visits) / (self.visits or 1))
-        # --------------//old one - discovery_operand = self.discovery_factor * (self.policy_value or 1) * sqrt(log(self.parent.visits) / (self.visits or 1))
-
-        '''
-        maybe nothing
-        '''
-        win_multiplier = 1 if self.original_player == callingPlayer else -1
-        win_operand = win_multiplier * self.win_value / (self.visits or 1)
+            discovery_operand = self.discovery_factor * (self.policy_value or 1) * sqrt(log(self.parent.visits) / (self.visits or 1))
+            win_multiplier = 1 if self.original_player == callingPlayer else -1
+            win_operand = win_multiplier * self.win_value / (self.visits or 1)
         self.score = win_operand + discovery_operand
         return self.score
+        ###
 
     def is_scorable(self):
         return self.visits or self.policy_value != None
