@@ -132,7 +132,7 @@ def build_board_planes(plane_count, historical_boards: HistoricalBoards, game, c
 
     historical_boards.add_turn(board_planes[:, :, turns[0][1]], board_planes[:, :, turns[0][2]], current_player)
 
-    if game.board.player_turn == Player_id.BLACK_PLAYER:
+    if game.board.player_turn == Player_id.BLACK_PLAYER.value:
         board_planes[:, :, (plane_count - 1)] = np.ones((board_size_x, board_size_y), dtype=int)
 
     return board_planes
@@ -140,7 +140,7 @@ def build_board_planes(plane_count, historical_boards: HistoricalBoards, game, c
 
 def get_child_policy_value(child, policy):
     policy = policy[0]
-    rowType = 8 * round(child[0] / 8)
+    rowType = 8 * np.math.floor(((child[0] - 1) / 8)+0.5)
     if rowType < child[0]:
         distance = 0
     else:
@@ -148,6 +148,7 @@ def get_child_policy_value(child, policy):
     destination = policyIndex[distance][child[1] - child[0]]
     index = (len(policy) / 32) * (child[0] - 1) + destination
     return policy[int(index)]
+#each 8 is one piece. each board has 8 values, from 0 to 7; 0- move north east, 1 - move north west, 2- move south east, 3- move south west, 4- jump north east, 5- jump north west, 6- jump south east, 7- jump south west
 
 
 def convert_to_output(children, probabilities_value):
