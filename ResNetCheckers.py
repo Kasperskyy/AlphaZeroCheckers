@@ -1,7 +1,5 @@
 ## IMPORTS
 
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
 from tensorboard.compat.proto.config_pb2 import ConfigProto
 
@@ -24,11 +22,6 @@ import tensorflow as tf
 from tensorflow.python.keras.layers import ReLU, Add
 from tensorflow.python.keras.utils.vis_utils import plot_model
 
-# allocate 60% of GPU memory
-from keras.backend import set_session
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.7
-session = tf.compat.v1.InteractiveSession(config=config)
 
 
 
@@ -85,4 +78,3 @@ class Network:
         bn = ReLU()(relu)
         return bn
 
-# plot_model(theModel, to_file='model_plot.png', show_shapes=True, show_layer_names=False)
