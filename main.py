@@ -4,7 +4,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 import tensorflow as tf
 import keras.models
 import ResNetCheckers
-import main
+import gamePlayer
 import Training
 import pickle
 from keras import backend as k
@@ -33,7 +33,7 @@ if choopaczups == 1:
     for i in range(1000):
         print("iteration: ", i)
 
-        trainingData = main.selfplay(1, model)  # generate self play data
+        trainingData = gamePlayer.selfplay(1, model)  # generate self play data
 
         #with open("TrainingDataADDITIONAL.txt", "wb") as fp:
         #   pickle.dump(trainingData, fp)
@@ -44,7 +44,7 @@ if choopaczups == 1:
         Training.trainNetwork(newModel, trainingData)  # training loop
 
         # ##the next 6 lines can be commented to omit evaluation
-        isNewNetworkBetter = main.evaluate(model, newModel, 1)  # evaluate model #CHANGE TO 50 GIER
+        isNewNetworkBetter = gamePlayer.evaluate(model, newModel, 1)  # evaluate model #CHANGE TO 50 GIER
         # print(main.evaluate(model, model, 10))
 
         if isNewNetworkBetter > victory_threshold:
@@ -65,11 +65,13 @@ if choopaczups == 1:
         # model.save('AlphaZeroCheckersModel')  ###path of file here
         # print("model saved!")
 else:
+    numgame = 100
     print("Players:\n")
     print("0 -> human player\n")
     print("1 -> random player\n")
     print("2 -> alphazero player\n")
     player1 = int(input("Choose first player:\n"))
     player2 = int(input("Choose second player:\n"))
-    print(main.evaluateplayer(model, 10, player1, player2))
+    victories, draws = gamePlayer.evaluateplayer(model, numgame, player1, player2)
+    print("Victories " + str(victories/numgame) + " Draws " + str(draws/numgame))
 
