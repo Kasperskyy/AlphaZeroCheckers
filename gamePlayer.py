@@ -8,12 +8,12 @@ from checkers.game import Game
 import InputBuilder
 
 
-historicalBoards = None
+
 game = None
 
 
 def selfplay(numbgame, model):
-    global game, historicalBoards
+    global game
 
     doPrints = False  # set to True to see console
 
@@ -22,7 +22,6 @@ def selfplay(numbgame, model):
         game = Game()
         montecarlo = MonteCarlo(Node(game), model)
         gameData = []
-        historicalBoards = InputBuilder.HistoricalBoards()
         montecarlo.child_finder = child_finder
         if doPrints:
             print("game " + str(i))
@@ -35,7 +34,7 @@ def selfplay(numbgame, model):
                 print("turn " + str(len(game.moves)))
 
             currPlayer = game.whose_turn()
-            currInput = InputBuilder.build_board_planes(17, historicalBoards, game, currPlayer)
+            currInput = InputBuilder.build_board_planes(5, game, currPlayer)
 
             montecarlo.simulate(100, currPlayer)  # number of simulations per turn. do not put less than 2
 
@@ -64,7 +63,7 @@ def selfplay(numbgame, model):
     return totalData
 
 def evaluate(bestmodel, challenger, num_games):
-    global game, historicalBoards, currInput
+    global game
     victoryCounter = 0
     doPrints = True
     for i in range(num_games):
@@ -101,7 +100,7 @@ def evaluate(bestmodel, challenger, num_games):
     return victoryCounter / num_games
 
 def evaluateplayer(model, num_games, player1, player2):
-    global game, historicalBoards, currInput
+    global game
     doPrints = False
 
     victoryCounter = 0
@@ -199,16 +198,13 @@ def evaluateplayer(model, num_games, player1, player2):
 
 def child_finder(node, self, callingPlayer):
 
-    if node.historical_boards is None:
-        node.historical_boards = InputBuilder.HistoricalBoards()
-    x = InputBuilder.build_board_planes(17, node.historical_boards, node.state, callingPlayer)
+    x = InputBuilder.build_board_planes(5, node.state, callingPlayer)
     x = x[np.newaxis, :, :]
     node.original_player = callingPlayer
     expert_policy_values, win_value = self.model.predict(x)
     for move in node.state.get_possible_moves():
         child = Node(deepcopy(node.state))
         child.state.move(move)
-        child.historical_boards = deepcopy(node.historical_boards)
         child.player_number = child.state.whose_turn()
         child.policy_value = InputBuilder.get_child_policy_value(move, expert_policy_values)
         node.add_child(child)
