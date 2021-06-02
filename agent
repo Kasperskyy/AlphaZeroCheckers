@@ -64,12 +64,12 @@ def BoardVisualization(game):
                         add_str = "\033[0m" + " _ "
                     if add_str == '1':
                         if matrix_is_king[i][j]:
-                            add_str = fg.black + ' A '
+                            add_str = fg.black + ' K '
                         else:
                             add_str = fg.black + ' ● '
                     if add_str == '2':
                         if matrix_is_king[i][j]:
-                            add_str = fg.white + ' B '
+                            add_str = fg.white + ' K '
                         else:
                             add_str = fg.white + ' ● '
 
