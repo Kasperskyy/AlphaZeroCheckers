@@ -37,7 +37,7 @@ class Node:
             self.discovery_factor = 2
         elif self.visits < 20:
             self.discovery_factor = 1.5
-        elif self.visits <25:
+        else:
             self.discovery_factor = 1
 
         if self.parent:
