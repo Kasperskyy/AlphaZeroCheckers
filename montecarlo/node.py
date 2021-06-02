@@ -17,7 +17,6 @@ class Node:
 
         ### below code is added by us
         self.original_player = None
-        self.historical_boards = None
         ###
 
     def update_win_value(self, value, callingPlayer):
