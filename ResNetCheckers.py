@@ -33,7 +33,7 @@ class Network:
         return self.theModel
 
     def build(self):
-        inputShape = (4, 8, 17)
+        inputShape = (4, 8, 5)
         inputs = Input(shape=inputShape)
         network = self.buildConvLayer(inputs)
         for i in range(15):
@@ -77,4 +77,6 @@ class Network:
         relu = BatchNormalization()(inputs)
         bn = ReLU()(relu)
         return bn
+
+
 
