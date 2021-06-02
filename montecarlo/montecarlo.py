@@ -73,7 +73,6 @@ class MonteCarlo:
         if not found:
             child = Node(deepcopy(self.root_node.state))
             child.state.move(move)
-            child.historical_boards = deepcopy(self.root_node.historical_boards)
             child.player_number = child.state.whose_turn()
             self.root_node.add_child(child)
             self.root_node = child
