@@ -1,3 +1,4 @@
+import math
 import random
 from math import log, sqrt
 
@@ -13,7 +14,7 @@ class Node:
         self.children = []
         self.expanded = False
         self.player_number = None
-        self.discovery_factor = 1
+        self.discovery_factor = 2
 
         ### below code is added by us
         self.original_player = None
@@ -32,6 +33,13 @@ class Node:
 
         self.win_value = newValue
         self.visits += 1
+        if self.visits < 10:
+            self.discovery_factor = 2
+        elif self.visits < 20:
+            self.discovery_factor = 1.5
+        elif self.visits <25:
+            self.discovery_factor = 1
+
         if self.parent:
             self.parent.update_win_value(value, callingPlayer)
         ###
