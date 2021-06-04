@@ -14,29 +14,29 @@ class MonteCarlo:
         self.model = model
         ###
 
-    def make_choice(self):
+    def make_choice(self, callingPlayer):
         best_children = []
         most_visits = float('-inf')
 
         for child in self.root_node.children:
-            if child.visits > most_visits:
-                most_visits = child.visits
+            if child.visits[callingPlayer-1] > most_visits:
+                most_visits = child.visits[callingPlayer-1]
                 best_children = [child]
-            elif child.visits == most_visits:
+            elif child.visits[callingPlayer-1] == most_visits:
                 best_children.append(child)
 
         return random.choice(best_children)
 
     ###Below Function is created entirely by us
-    def get_probabilities(self):
-        children_visits = map(lambda child: child.visits, self.root_node.children)
-        children_visit_probabilities = [visit / self.root_node.visits for visit in children_visits]
+    def get_probabilities(self, callingPlayer):
+        children_visits = map(lambda child: child.visits[callingPlayer-1], self.root_node.children)
+        children_visit_probabilities = [visit / self.root_node.visits[callingPlayer-1] for visit in children_visits]
         return children_visit_probabilities
     ###
 
-    def make_exploratory_choice(self):
-        children_visits = map(lambda child: child.visits, self.root_node.children)
-        children_visit_probabilities = [visit / self.root_node.visits for visit in children_visits]
+    def make_exploratory_choice(self, callingPlayer):
+        children_visits = map(lambda child: child.visits[callingPlayer-1], self.root_node.children)
+        children_visit_probabilities = [visit / self.root_node.visits[callingPlayer-1] for visit in children_visits]
         random_probability = random.uniform(0, 1)
         probabilities_already_counted = 0.
 
@@ -61,13 +61,13 @@ class MonteCarlo:
             node.expanded = True
 
     ### Below Function is created entirely by us
-    def non_user_expand(self, move):
+    def non_user_expand(self, move, callingPlayer):
         found = False
         for x in self.root_node.children:
             if x.state.moves[-1] == move:
                 self.root_node = x
-                if self.root_node.visits != 0:
-                    self.root_node.visits -= 1
+                if self.root_node.visits[callingPlayer-1] != 0:
+                    self.root_node.visits[callingPlayer-1] -= 1
                 found = True
                 break
         if not found:
