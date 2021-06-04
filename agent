@@ -104,20 +104,20 @@ class Agent:
 
             print(
                 "==============================================================================================================")
-            montecarloActive.non_user_expand(move)
+            montecarloActive.non_user_expand(move, self.number)
             return move
         elif self.botcategory == 1:
             possible_moves = []
             for x in montecarloActive.root_node.state.get_possible_moves():
                 possible_moves.append(x)
             move = random.choice(possible_moves)
-            montecarloActive.non_user_expand(move)
+            montecarloActive.non_user_expand(move, self.number)
             return move
         else:
             montecarloActive.simulate(100, self.number)
-            montecarloActive.root_node = montecarloActive.make_choice()
-            if montecarloActive.root_node.visits != 0:
-                montecarloActive.root_node.visits -= 1
+            montecarloActive.root_node = montecarloActive.make_choice(self.number)
+            if montecarloActive.root_node.visits[self.number-1] != 0:
+                montecarloActive.root_node.visits[self.number-1] -= 1
             if montecarloPassive is not None:
-                montecarloPassive.non_user_expand(montecarloActive.root_node.state.moves[-1])
+                montecarloPassive.non_user_expand(montecarloActive.root_node.state.moves[-1], self.number)
             return montecarloActive.root_node.state.moves[-1]
