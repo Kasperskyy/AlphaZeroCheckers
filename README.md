@@ -7,4 +7,6 @@ https://pypi.org/project/imparaai-montecarlo/
 
 
 ## Cudadriver 
-This file is only useful for Paulina
+This file is only useful for Paulina. 
+Zawartość pliku powinna znajdować się w odpowiednim pliku z tworzeniem sieci neuronowej.
+
