@@ -1,0 +1,14 @@
+## IMPORTS
+# to turn off the warnings
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+
+# library used to combine CUDA with Python
+from tensorboard.compat.proto.config_pb2 import ConfigProto
+from keras.backend import set_session
+
+# allocate 70% of GPU memory
+config = tf.compat.v1.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.7
+session = tf.compat.v1.InteractiveSession(config=config)
+
