@@ -9,12 +9,12 @@ class Node:
         self.state = state
         self.win_value = 0
         self.policy_value = None
-        self.visits = 0
+        self.visits = [0]*2
         self.parent = None
         self.children = []
         self.expanded = False
         self.player_number = None
-        self.discovery_factor = 2
+        self.discovery_factor = 2.5
 
         ### below code is added by us
         self.original_player = None
@@ -26,20 +26,13 @@ class Node:
         multiplier = 1
         if callingPlayer != self.original_player:
             multiplier = -1
-        if self.visits != 0:
-            sum = self.win_value * self.visits
+        if self.visits[callingPlayer-1] != 0:
+            sum = self.win_value * self.visits[callingPlayer-1]
             sum += (newValue * multiplier)
-            newValue = sum / (self.visits + 1)
+            newValue = sum / (self.visits[callingPlayer-1] + 1)
 
         self.win_value = newValue
-        self.visits += 1
-        if self.visits < 10:
-            self.discovery_factor = 2
-        elif self.visits < 20:
-            self.discovery_factor = 1.5
-        else:
-            self.discovery_factor = 1
-
+        self.visits[callingPlayer-1] += 1
         if self.parent:
             self.parent.update_win_value(value, callingPlayer)
         ###
@@ -74,14 +67,10 @@ class Node:
             discovery_operand = float('inf')
             win_operand = 0
         else:
-            discovery_operand = self.discovery_factor * (self.policy_value or 1) * ((sqrt(self.parent.visits))/(1 + self.visits))
+            discovery_operand = self.discovery_factor * (self.policy_value or 1) * ((sqrt(self.parent.visits[callingPlayer-1]))/(1 + self.visits[callingPlayer-1]))
             win_multiplier = 1 if self.original_player == callingPlayer else -1
-            win_operand = win_multiplier * self.win_value / (self.visits or 1)
+            win_operand = win_multiplier * self.win_value
         self.score = win_operand + discovery_operand
         return self.score
         ###
 
-
-
-    def is_scorable(self):
-        return self.visits or self.policy_value != None
