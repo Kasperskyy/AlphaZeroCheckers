@@ -50,14 +50,16 @@ class Network:
         value = Flatten()(value)
         value = Dense(256)(value)
         value = ReLU()(value)
-        value = Dense(1, activation='tanh')(value)
+        initializer = tf.keras.initializers.RandomNormal(mean=0.0, stddev=0.005, seed=None)
+        value = Dense(1, activation='tanh', kernel_initializer=initializer)(value)
         return value
 
     def buildPolicyHead(self, inputs):
         policy = Conv2D(filters=2, kernel_size=1, strides=1)(inputs)
         policy = self.bn_relu(policy)
         policy = Flatten()(policy)
-        policy = Dense(256, activation='softmax')(policy)  # 32 x 8
+        initializer = tf.keras.initializers.RandomNormal(mean=0.5, stddev=0.05, seed=None)
+        policy = Dense(256, activation='softmax', kernel_initializer=initializer)(policy)  # 32 x 8
         return policy
 
     def buildConvLayer(self, inputs):
@@ -77,6 +79,4 @@ class Network:
         relu = BatchNormalization()(inputs)
         bn = ReLU()(relu)
         return bn
-
-
 
