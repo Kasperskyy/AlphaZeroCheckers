@@ -116,8 +116,8 @@ class Agent:
         else:
             montecarloActive.simulate(100, self.number)
             montecarloActive.root_node = montecarloActive.make_choice(self.number)
-            if montecarloActive.root_node.visits[self.number-1] != 0:
-                montecarloActive.root_node.visits[self.number-1] -= 1
+            if montecarloActive.root_node.visits[(montecarloActive.root_node.original_player) - 1] != 0:
+                montecarloActive.root_node.visits[(montecarloActive.root_node.original_player) - 1] -= 1
             if montecarloPassive is not None:
                 montecarloPassive.non_user_expand(montecarloActive.root_node.state.moves[-1], self.number)
             return montecarloActive.root_node.state.moves[-1]
