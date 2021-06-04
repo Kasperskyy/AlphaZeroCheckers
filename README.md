@@ -6,3 +6,5 @@ https://pypi.org/project/imparaai-checkers/
 https://pypi.org/project/imparaai-montecarlo/
 
 
+## Cudadriver 
+This file is only useful for Paulina
