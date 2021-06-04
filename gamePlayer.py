@@ -1,3 +1,4 @@
+import pickle
 import random
 import numpy as np
 from copy import deepcopy
@@ -23,8 +24,8 @@ def selfplay(numbgame, model):
         montecarlo = MonteCarlo(Node(game), model)
         gameData = []
         montecarlo.child_finder = child_finder
-        if doPrints:
-            print("game " + str(i))
+        #if doPrints:
+        print("game " + str(i))
         montecarlo.root_node.player_number = game.whose_turn()
 
         while not (game.is_over()):
@@ -38,16 +39,15 @@ def selfplay(numbgame, model):
 
             montecarlo.simulate(100, currPlayer)  # number of simulations per turn. do not put less than 2
 
-            probabilities_value = montecarlo.get_probabilities()
+            probabilities_value = montecarlo.get_probabilities(currPlayer)
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
 
-
             if len(game.moves) < 8:  #heuristic method of forcing some exploration
-                montecarlo.root_node = montecarlo.make_exploratory_choice()
+                montecarlo.root_node = montecarlo.make_exploratory_choice(currPlayer)
             else:
-                montecarlo.root_node = montecarlo.make_choice() #rest of moves are the network playing "optimally"
-            if montecarlo.root_node.visits != 0:
-                montecarlo.root_node.visits -= 1
+                montecarlo.root_node = montecarlo.make_choice(currPlayer) #rest of moves are the network playing "optimally"
+            if montecarlo.root_node.visits[currPlayer-1] != 0:
+                montecarlo.root_node.visits[currPlayer-1] -= 1
 
             game.move(montecarlo.root_node.state.moves[-1])
             gameData.append((currInput, probabilities, 0, currPlayer))
@@ -57,9 +57,13 @@ def selfplay(numbgame, model):
             data = list(game)
             if data[3] == winner:
                 data[2] = 1
-            else:
+            elif winner is not None:
                 data[2] = -1
+            else:
+                data[2] = 0 #already equal to zero but just a sanity check
             totalData.append((data[0], data[1], data[2]))
+        with open("TrainingData.txt", "wb") as fp:
+            pickle.dump(totalData, fp)
     return totalData
 
 def evaluate(bestmodel, challenger, num_games):
