@@ -66,8 +66,9 @@ class MonteCarlo:
         for x in self.root_node.children:
             if x.state.moves[-1] == move:
                 self.root_node = x
-                if self.root_node.visits[callingPlayer-1] != 0:
-                    self.root_node.visits[callingPlayer-1] -= 1
+                if self.root_node.original_player is not None:
+                    if self.root_node.visits[(self.root_node.original_player)-1] != 0:
+                        self.root_node.visits[(self.root_node.original_player)-1] -= 1
                 found = True
                 break
         if not found:
