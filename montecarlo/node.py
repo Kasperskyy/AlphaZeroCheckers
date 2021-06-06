@@ -14,8 +14,7 @@ class Node:
         self.children = []
         self.expanded = False
         self.player_number = None
-        self.discovery_factor = 2.5
-
+        self.discovery_factor = 1
         ### below code is added by us
         self.original_player = None
         ###
@@ -50,7 +49,6 @@ class Node:
     def get_preferred_child(self, callingPlayer):
         best_children = []
         best_score = float('-inf')
-
         for child in self.children:
             score = child.get_score(callingPlayer)
 
@@ -63,7 +61,7 @@ class Node:
 
     def get_score(self, callingPlayer):
         ###Below code is modified by us
-        if self.original_player is None:
+        if self.original_player is None or self.visits[callingPlayer -1] < 6:
             discovery_operand = float('inf')
             win_operand = 0
         else:
