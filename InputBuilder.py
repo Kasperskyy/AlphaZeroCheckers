@@ -77,6 +77,12 @@ def build_board_planes(plane_count, game, currPlayer):
                 board_planes[x][y][turns[0][piece.player]] = 1
             else:
                 board_planes[x][y][turns[1][piece.player]] = 1
+    if currPlayer != game.whose_turn():
+        counter = 0
+        for i in board_planes.transpose(2,0,1):
+            i = np.rot90(i,2)
+            board_planes[:,:,counter] = i
+            counter += 1
               # put 1 on the player's position (in his orientation)
 
     if game.board.player_turn == Player_id.BLACK_PLAYER.value:
