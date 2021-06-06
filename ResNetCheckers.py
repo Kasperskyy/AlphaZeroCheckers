@@ -36,7 +36,7 @@ class Network:
         inputShape = (4, 8, 5)
         inputs = Input(shape=inputShape)
         network = self.buildConvLayer(inputs)
-        for i in range(15):
+        for i in range(5):
             network = self.buildResLayer(network)
         value_head = self.buildValueHead(network)
         policy_head = self.buildPolicyHead(network)
