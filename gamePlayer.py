@@ -10,12 +10,9 @@ import InputBuilder
 
 
 
-game = None
 
 
 def selfplay(numbgame, model):
-    global game
-
     doPrints = False  # set to True to see console
 
     totalData = []
@@ -40,12 +37,10 @@ def selfplay(numbgame, model):
             probabilities_value = montecarlo.get_probabilities(currPlayer)
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
 
-            if sum(probabilities_value) != 1:
-                asda = 2
-            if len(game.moves) < 8:  #heuristic method of forcing some exploration
-                montecarlo.root_node = montecarlo.make_exploratory_choice(currPlayer)
-            else:
-                montecarlo.root_node = montecarlo.make_choice(currPlayer) #rest of moves are the network playing "optimally"
+            #if len(game.moves) < 40:  #heuristic method of forcing some exploration
+            montecarlo.root_node = montecarlo.make_exploratory_choice(currPlayer)
+            #else:
+            #    montecarlo.root_node = montecarlo.make_choice(currPlayer) #rest of moves are the network playing "optimally"
 
             if montecarlo.root_node.visits[montecarlo.root_node.original_player - 1] != 0:
                 montecarlo.root_node.visits[montecarlo.root_node.original_player - 1] -= 1
