@@ -33,11 +33,12 @@ def selfplay(numbgame, model):
 
             currPlayer = game.whose_turn()
             currInput = InputBuilder.build_board_planes(5, game, currPlayer)
-            montecarlo.simulate(100, currPlayer)  # number of simulations per turn. do not put less than 2
+            montecarlo.simulate(40, currPlayer)  # number of simulations per turn. do not put less than 2
             probabilities_value = montecarlo.get_probabilities(currPlayer)
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
 
-            #if len(game.moves) < 40:  #heuristic method of forcing some exploration
+            #if len(game.moves) > 40:  #heuristic method of forcing some exploration
+
             montecarlo.root_node = montecarlo.make_exploratory_choice(currPlayer)
             #else:
             #    montecarlo.root_node = montecarlo.make_choice(currPlayer) #rest of moves are the network playing "optimally"
@@ -47,7 +48,8 @@ def selfplay(numbgame, model):
 
             game.move(montecarlo.root_node.state.moves[-1])
             gameData.append((currInput, probabilities, 0, currPlayer))
-
+            if len(game.moves) >= 75:    # game too long, auto-draw
+                break
         winner = game.get_winner()
         for game in gameData:
             data = list(game)
@@ -209,4 +211,6 @@ def child_finder(node, self, callingPlayer):
         child.policy_value = InputBuilder.get_child_policy_value(move, expert_policy_values)
         node.add_child(child)
     if node.parent is not None:
+        if node.original_player != node.player_number:
+            win_value *= -1
         node.update_win_value(float(win_value), callingPlayer)
