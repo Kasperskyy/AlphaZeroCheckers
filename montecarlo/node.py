@@ -23,8 +23,6 @@ class Node:
         ### below code is modified by us
         newValue=value
         multiplier = 1
-        if callingPlayer != self.original_player:
-            multiplier = -1
         if self.visits[callingPlayer-1] != 0:
             sum = self.win_value * self.visits[callingPlayer-1]
             sum += (newValue * multiplier)
@@ -33,7 +31,7 @@ class Node:
         self.win_value = newValue
         self.visits[callingPlayer-1] += 1
         if self.parent:
-            self.parent.update_win_value(value, callingPlayer)
+                self.parent.update_win_value(value, callingPlayer)
         ###
     def update_policy_value(self, value):
         self.policy_value = value
@@ -61,7 +59,8 @@ class Node:
 
     def get_score(self, callingPlayer):
         ###Below code is modified by us
-        if self.original_player is None or self.visits[callingPlayer -1] < 6:
+        if self.original_player is None:
+                #or self.visits[callingPlayer -1] < 6:
             discovery_operand = float('inf')
             win_operand = 0
         else:
