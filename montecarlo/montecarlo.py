@@ -15,6 +15,7 @@ class MonteCarlo:
         ###
 
     def make_choice(self, callingPlayer):
+        self.root_node.active = False
         best_children = []
         most_visits = float('-inf')
 
@@ -24,8 +25,9 @@ class MonteCarlo:
                 best_children = [child]
             elif child.visits[callingPlayer-1] == most_visits:
                 best_children.append(child)
-
-        return random.choice(best_children)
+        theChoice = random.choice(best_children)
+        theChoice.parent = None
+        return theChoice
 
     ###Below Function is created entirely by us
     def get_probabilities(self, callingPlayer):
@@ -35,6 +37,7 @@ class MonteCarlo:
     ###
 
     def make_exploratory_choice(self, callingPlayer):
+        self.root_node.active = False
         children_visits = map(lambda child: child.visits[callingPlayer-1], self.root_node.children)
         children_visit_probabilities = [visit / self.root_node.visits[callingPlayer-1] for visit in children_visits]
         random_probability = random.uniform(0, 1)
@@ -42,6 +45,7 @@ class MonteCarlo:
 
         for i, probability in enumerate(children_visit_probabilities):
             if probabilities_already_counted + probability >= random_probability:
+                self.root_node.children[i].parent = None
                 return self.root_node.children[i]
 
             probabilities_already_counted += probability
@@ -49,7 +53,6 @@ class MonteCarlo:
     def simulate(self, expansion_count=1, currentPlayer=None):
         for i in range(expansion_count):
             current_node = self.root_node
-
             while current_node.expanded:
                 current_node = current_node.get_preferred_child(currentPlayer)
 
