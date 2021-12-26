@@ -1,5 +1,6 @@
 # AlphaZeroCheckers
 A University Project 
+
 Checkers library and mcts library used as template and modified
 
 https://pypi.org/project/imparaai-checkers/
