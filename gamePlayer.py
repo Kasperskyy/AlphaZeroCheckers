@@ -14,7 +14,6 @@ import InputBuilder
 
 def selfplay(numbgame, model):
     doPrints = False  # set to True to see console
-
     totalData = []
     for i in range(numbgame):
         game = Game()
@@ -33,11 +32,10 @@ def selfplay(numbgame, model):
 
             currPlayer = game.whose_turn()
             currInput = InputBuilder.build_board_planes(5, game, currPlayer)
-            montecarlo.simulate(40, currPlayer)  # number of simulations per turn. do not put less than 2
+            montecarlo.simulate(50, currPlayer)  # number of simulations per turn. do not put less than 2
             probabilities_value = montecarlo.get_probabilities(currPlayer)
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
 
-            #if len(game.moves) > 40:  #heuristic method of forcing some exploration
 
             montecarlo.root_node = montecarlo.make_exploratory_choice(currPlayer)
             #else:
@@ -48,7 +46,7 @@ def selfplay(numbgame, model):
 
             game.move(montecarlo.root_node.state.moves[-1])
             gameData.append((currInput, probabilities, 0, currPlayer))
-            if len(game.moves) >= 75:    # game too long, auto-draw
+            if len(game.moves) >= 120:    # game too long, auto-draw
                 break
         winner = game.get_winner()
         for game in gameData:
@@ -58,7 +56,7 @@ def selfplay(numbgame, model):
             elif winner is not None:
                 data[2] = -1
             else:
-                data[2] = 0 #already equal to zero but just a sanity check
+                data[2] = 0 #already equal to zero but done for clarity
             totalData.append((data[0], data[1], data[2]))
         with open("TrainingData.txt", "wb") as fp:
             pickle.dump(totalData, fp)
@@ -80,7 +78,6 @@ def evaluate(bestmodel, challenger, num_games):
             challengerIndex = 1
             montecarloP1 = MonteCarlo(Node(game), challenger)
             montecarloP2 = MonteCarlo(Node(game), bestmodel)
-
         montecarloP1.child_finder = child_finder
         montecarloP2.child_finder = child_finder
         montecarloP1.root_node.player_number = 1
@@ -109,73 +106,24 @@ def evaluateplayer(model, num_games, player1, player2):
     drawCounter = 0
     visualizable = int(
         input("Do you want game to be visualizable 0(not_visualizable), 1(visualizable):\n"))
-    cheer = int(input("Choose cheer player to cheer 0(human), 1(random), 2(alphazero):\n"))
+    cheer = int(input("Choose player to cheer[their wins count as your wins] 0(human), 1(random), 2(alphazero):\n"))
+    if visualizable == 1:
+        orient = int(input("Choose player at the bottom of the screen black(0), white(1): \n"))
+    order = int(input("Choose who plays black[black is always first] random(0), first player(1), second player(2) "))
     for i in range(num_games):
         game = Game()
-        if (player1 == 0 and player2 == 1) or (player1 == 1 and player2 == 0):
-            if random.random() < 0.5:
-                p1 = Agent(0, 1, visualizable)
-                p2 = Agent(1, 2, visualizable)
-                if cheer == 0:
-                    challengerIndex = 1
-                    print("You are black!")
-                else:
-                    challengerIndex = 2
-                    print("You are white!")
-            else:
-                p1 = Agent(1, 1, visualizable)
-                p2 = Agent(0, 2, visualizable)
-                if cheer == 0:
-                    challengerIndex = 2
-                    print("You are white!")
-                else:
-                    challengerIndex = 1
-                    print("You are black!")
+        if (order == 0 and random.random() < 0.5) or order == 1:
+            p1 = Agent(player1, 1, visualizable, orient)
+            p2 = Agent(player2, 1, visualizable, orient)
+        else:
+            p1 = Agent(player2, 1, visualizable, orient)
+            p2 = Agent(player1, 1, visualizable, orient)
+        challengerIndex = cheer + 1
+        if cheer == 0:
+            print("Cheering black!")
+        else:
+            print("Cheering white!")
 
-        elif (player1 == 0 and player2 == 2) or (player1 == 2 and player2 == 0):
-            if random.random() < 0.5:
-                p1 = Agent(0, 1, visualizable)
-                p2 = Agent(2, 2, visualizable)
-                if cheer == 0:
-                    challengerIndex = 1
-                    print("You are black!")
-                else:
-                    challengerIndex = 2
-                    print("You are white!")
-
-            else:
-                p1 = Agent(2, 1, visualizable)
-                p2 = Agent(0, 2, visualizable)
-                if cheer == 0:
-                    challengerIndex = 2
-                    print("You are white!")
-                else:
-                    challengerIndex = 1
-                    print("You are black!")
-
-        elif (player1 == 1 and player2 == 2) or (player1 == 2 and player2 == 1):
-            if random.random() < 0.5:
-                p1 = Agent(1, 1, visualizable)
-                p2 = Agent(2, 2, visualizable)
-                if cheer == 1:
-                    challengerIndex = 1
-                    print("You are black!")
-                else:
-                    challengerIndex = 2
-                    print("You are white!")
-            else:
-                p1 = Agent(2, 1, visualizable)
-                p2 = Agent(1, 2, visualizable)
-                if cheer == 1:
-                    challengerIndex = 2
-                    print("You are white!")
-                else:
-                    challengerIndex = 1
-                    print("You are black!")
-        elif (player1 == 0 and player2 == 0):
-            p1 = Agent(0,1, visualizable)
-            p2 = Agent(0, 2, visualizable)
-            challengerIndex = 1
         montecarlo = MonteCarlo(Node(game), model)
         montecarlo.child_finder = child_finder
         montecarlo.root_node.player_number = game.whose_turn()
@@ -186,10 +134,8 @@ def evaluateplayer(model, num_games, player1, player2):
                     print("turn " + str(len(game.moves)))
             if game.whose_turn() == 1:
                 move = p1.make_move(montecarloActive = montecarlo, game = game, montecarloPassive = None)
-                print("Black to play next move")
             else:
                 move = p2.make_move(montecarloActive = montecarlo, game = game, montecarloPassive = None)
-                print("White to play next move")
             game.move(move)
         if game.get_winner() == challengerIndex:
             victoryCounter += 1
