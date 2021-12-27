@@ -19,6 +19,7 @@ To test, choose 2 on the main menu, and then select all parameteres as prompted.
 ## AlphaZeroCheckersModel 
 
 a model that has undergone training by us. It will always win against random agents and has managed to beat the hardest bots on some checkers websites that we have tested it against.
+link: https://drive.google.com/file/d/1YcEe63C6MDwAJgruhwAWe1_-D4F0gcd0/view?usp=sharing
 
 
 Checkers library and mcts library used as template and modified
