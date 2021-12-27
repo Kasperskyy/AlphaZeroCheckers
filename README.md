@@ -16,7 +16,9 @@ First you must choose whether to use the saved model, or create a new one. CREAT
 The program has 3 agents, a random agent, a human agent and an MCTS agent that uses the model saved as 'AlphaZeroCheckersModel'
 To test, choose 2 on the main menu, and then select all parameteres as prompted. Console visualisation is possible. For more MCTS simulations per turn, the code for the MCTS agent must be modified in agent.py.
 
+## AlphaZeroCheckersModel 
 
+a model that has undergone training by us. It will always win against random agents and has managed to beat the hardest bots on some checkers websites that we have tested it against.
 
 
 Checkers library and mcts library used as template and modified
