@@ -58,21 +58,7 @@ def BoardVisualization(game, orientation):
                         templ_str = " _ "
                     else:
                         templ_str = ' ' + templ_str
-                    # if templ_str == '4':
-                    #     templ_str = "  " + templ_str
-                    # if templ_str == '5':
-                    #     templ_str = templ_str + "  "
-                    # if templ_str == '8':
-                    #     templ_str = templ_str + " "
-                    # if templ_str == '6':
-                    #     templ_str = templ_str + " "
-                    # if templ_str == '9':
-                    #     templ_str = templ_str + " "
-                    # if templ_str == '2':
-                    #     templ_str = templ_str + " "
-                    # if templ_str == '1':
-                    #     templ_str = templ_str + " "
-
+                  
                     add_str = str(display_matrix[i][j])  # 1 2 0
                     if add_str == '0':
                         add_str = "\033[0m" + " _ "
