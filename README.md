@@ -22,7 +22,9 @@ a model that has undergone training by us. It will always win against random age
 link: https://drive.google.com/file/d/1YcEe63C6MDwAJgruhwAWe1_-D4F0gcd0/view?usp=sharing
 
 
-Checkers library used: https://pypi.org/project/imparaai-checkers/ implementing these rules of checkers: http://www.usacheckers.com/rulesofcheckers.php\
+Checkers library used: https://pypi.org/project/imparaai-checkers/ implementing these rules of checkers: http://www.usacheckers.com/rulesofcheckers.php
+
+
 mcts library used as template and modified: https://pypi.org/project/imparaai-montecarlo/
 
 
