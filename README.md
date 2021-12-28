@@ -1,5 +1,5 @@
 # AlphaZeroCheckers
-A University Project
+A University Project iniitally created as a project for the subject Artificial Intelligence, and then expanded and improved.
 
 ## Overview
 an AI for the board game known as American Checkers, using the AlphaZero approach: trained with no external data other than the rules of the game, it generates data by playing against itself and learning form these games, constantly improving. Adapted from the Original AlphaZero paper for chess and simplified for checkers. See: https://arxiv.org/pdf/1712.01815.pdf
