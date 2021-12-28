@@ -12,7 +12,7 @@ import InputBuilder
 
 
 
-def selfplay(numbgame, model):
+def selfplay(numbgame, model, simulations):
     doPrints = False  # set to True to see console
     totalData = []
     for i in range(numbgame):
@@ -32,7 +32,7 @@ def selfplay(numbgame, model):
 
             currPlayer = game.whose_turn()
             currInput = InputBuilder.build_board_planes(5, game, currPlayer)
-            montecarlo.simulate(50, currPlayer)  # number of simulations per turn. do not put less than 2
+            montecarlo.simulate(simulations, currPlayer)  # number of simulations per turn. do not put less than 2
             probabilities_value = montecarlo.get_probabilities(currPlayer)
             probabilities = InputBuilder.convert_to_output(game.get_possible_moves(), probabilities_value)
 
@@ -65,11 +65,12 @@ def selfplay(numbgame, model):
 def evaluate(bestmodel, challenger, num_games):
     global game
     victoryCounter = 0
+    lossCounter = 0
     doPrints = True
     for i in range(num_games):
         game = Game()
-        p1 = Agent(2, 1, False)
-        p2 = Agent(2, 2, False)
+        p1 = Agent(2, 1, False,0)
+        p2 = Agent(2, 2, False,0)
         if random.random() < 0.5:  # who goes first
             challengerIndex = 2
             montecarloP1 = MonteCarlo(Node(game), bestmodel)
@@ -95,8 +96,9 @@ def evaluate(bestmodel, challenger, num_games):
             elif game.get_winner() is None:
                 print("tie")
             else:
+                lossCounter += 1
                 print("challenger has lost")
-    return victoryCounter / num_games
+    return victoryCounter, lossCounter
 
 def evaluateplayer(model, num_games, player1, player2):
     global game
