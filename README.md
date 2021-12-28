@@ -16,6 +16,18 @@ First you must choose whether to use the saved model, or create a new one. CREAT
 The program has 3 agents, a random agent, a human agent and an MCTS agent that uses the model saved as 'AlphaZeroCheckersModel'
 To test, choose 2 on the main menu, and then select all parameteres as prompted. Console visualisation is possible. For more MCTS simulations per turn, the code for the MCTS agent must be modified in agent.py.
 
+## ResNetCheckers.py
+
+contains the architecture of the network
+
+## Training.py
+
+Training configuration, feel free to experiment with the hyperparameters
+
+## InputBuilder.py
+
+Transforms game data into the format used by the network.
+
 ## AlphaZeroCheckersModel 
 
 a model that has undergone training by us. It took about 2-3 weeks to train, with 1-3 PCs constantly generating data. Training was done every 1-3 days. It will always win against random agents and has managed to beat the hardest bots on some checkers websites that we have tested it against.
@@ -30,5 +42,5 @@ MCTS library used as template and modified: https://pypi.org/project/imparaai-mo
 
 ## Cudadriver 
 This file is for gpu training. 
-Zawartość pliku powinna znajdować się w odpowiednim pliku z tworzeniem sieci neuronowej.
+This code should be added to the ResNetCheckers.py file.
 
