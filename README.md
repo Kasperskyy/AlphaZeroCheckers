@@ -2,7 +2,7 @@
 A University Project
 
 ## Overview
-an AI for the board game known as American Checkers. 
+an AI for the board game known as American Checkers, using the AlphaZero approach: trained with no external data other than the rules of the game, it generates data by playing against itself and learning form these games, constantly improving. Adapted from the Original AlphaZero paper for chess and simplified for checkers. See: https://arxiv.org/pdf/1712.01815.pdf
 
 ## Getting Started
 To start, run main.py. You will be presented with a menu of choices also described here:
